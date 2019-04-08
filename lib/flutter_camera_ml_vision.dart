@@ -100,9 +100,19 @@ class _BarcodeCameraMlVisionState extends State<BarcodeCameraMlVision> {
       //  TODO: add a better message when no camera available
       return Text('no camera available');
     }
-    return AspectRatio(
-      aspectRatio: _cameraController.value.aspectRatio,
-      child: CameraPreview(_cameraController),
+    return FittedBox(
+      alignment: Alignment.center,
+      fit: BoxFit.cover,
+      child: SizedBox(
+        width: 1000 * _cameraController.value.aspectRatio,
+        height: 1000,
+        child: AspectRatio(
+          aspectRatio: _cameraController.value.aspectRatio,
+          child: CameraPreview(
+            _cameraController,
+          ),
+        ),
+      ),
     );
   }
 }

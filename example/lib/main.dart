@@ -37,15 +37,19 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            BarcodeCameraMlVision(
-              onBarcode: (barcode) {
-                if (data.contains(barcode.displayValue)) {
-                  return;
-                }
-                setState(() {
-                  data.add(barcode.displayValue);
-                });
-              },
+            SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: 300,
+              child: BarcodeCameraMlVision(
+                onBarcode: (barcode) {
+                  if (data.contains(barcode.displayValue)) {
+                    return;
+                  }
+                  setState(() {
+                    data.add(barcode.displayValue);
+                  });
+                },
+              ),
             ),
             Expanded(
               child: ListView(
