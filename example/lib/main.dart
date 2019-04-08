@@ -1,3 +1,4 @@
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_camera_ml_vision/flutter_camera_ml_vision.dart';
 
@@ -34,31 +35,63 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            SizedBox(
-              width: MediaQuery.of(context).size.width,
-              height: 300,
-              child: BarcodeCameraMlVision(
-                onBarcode: (barcode) {
-                  if (data.contains(barcode.displayValue)) {
-                    return;
-                  }
-                  setState(() {
-                    data.add(barcode.displayValue);
-                  });
-                },
-              ),
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          RaisedButton(
+            child: Text('Scan product'),
+            onPressed: () async {
+              final barcode = await Navigator.of(context).push<Barcode>(
+                MaterialPageRoute(
+                  builder: (c) {
+                    return ScanPage();
+                  },
+                ),
+              );
+              if (barcode == null) {
+                return;
+              }
+
+              setState(() {
+                data.add(barcode.displayValue);
+              });
+            },
+          ),
+          Expanded(
+            child: ListView(
+              children: data.map((d) => Text(d)).toList(),
             ),
-            Expanded(
-              child: ListView(
-                children: data.map((d) => Text(d)).toList(),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class ScanPage extends StatefulWidget {
+  @override
+  _ScanPageState createState() => _ScanPageState();
+}
+
+class _ScanPageState extends State<ScanPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          child: BarcodeCameraMlVision(
+            barcodeFormat: BarcodeFormat.qrCode,
+            onBarcode: (barcode) {
+              if (!mounted) {
+                return;
+              }
+              Navigator.of(context).pop<Barcode>(barcode);
+            },
+          ),
+        ),
+      ),
     );
   }
 }

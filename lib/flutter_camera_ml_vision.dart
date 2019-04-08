@@ -1,14 +1,19 @@
 library flutter_camera_ml_vision;
 
+import 'dart:async';
+
 import 'package:camera/camera.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/widgets.dart';
+import 'package:rxdart/rxdart.dart';
 
 enum CameraMlVisionState {
   loading,
   noCamera,
   ready,
 }
+
+typedef FutureOr<bool> OnBarcode(Barcode barcode);
 
 class BarcodeCameraMlVision extends StatefulWidget {
   final BarcodeFormat barcodeFormat;
@@ -24,10 +29,26 @@ class BarcodeCameraMlVision extends StatefulWidget {
 }
 
 class _BarcodeCameraMlVisionState extends State<BarcodeCameraMlVision> {
+  final _barcodeController = StreamController<Barcode>();
+
   BarcodeDetector _barcodeDetector;
   CameraController _cameraController;
   CameraMlVisionState _cameraMlVisionState = CameraMlVisionState.loading;
   bool _alreadyCheckingImage = false;
+  StreamSubscription<Barcode> _barcodeSubscription;
+
+  Future<void> _dispose() async {
+    await _cameraController.stopImageStream();
+    await _cameraController.dispose();
+  }
+
+  @override
+  void dispose() {
+    _dispose();
+    _barcodeController.close();
+    _barcodeSubscription.cancel();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -55,6 +76,11 @@ class _BarcodeCameraMlVisionState extends State<BarcodeCameraMlVision> {
     setState(() {
       _cameraMlVisionState = CameraMlVisionState.ready;
     });
+    _barcodeSubscription = _barcodeController.stream
+        .transform(DebounceStreamTransformer(Duration(milliseconds: 500)))
+        .listen((barcode) {
+      widget.onBarcode(barcode);
+    });
 
     _cameraController.startImageStream((cameraImage) async {
       if (!_alreadyCheckingImage) {
@@ -78,16 +104,12 @@ class _BarcodeCameraMlVisionState extends State<BarcodeCameraMlVision> {
         );
         final List<Barcode> barcodes =
             await _barcodeDetector.detectInImage(image);
-        extractBarcodes(barcodes);
+        for (Barcode barcode in barcodes) {
+          _barcodeController.add(barcode);
+        }
         _alreadyCheckingImage = false;
       }
     });
-  }
-
-  void extractBarcodes(List<Barcode> barcodes) {
-    for (Barcode barcode in barcodes) {
-      widget.onBarcode(barcode);
-    }
   }
 
   @override
