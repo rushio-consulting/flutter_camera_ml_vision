@@ -104,8 +104,9 @@ class _BarcodeCameraMlVisionState extends State<BarcodeCameraMlVision> {
       alignment: Alignment.center,
       fit: BoxFit.cover,
       child: SizedBox(
-        width: 1000 * _cameraController.value.aspectRatio,
-        height: 1000,
+        width: _cameraController.value.previewSize.height *
+            _cameraController.value.aspectRatio,
+        height: _cameraController.value.previewSize.height,
         child: AspectRatio(
           aspectRatio: _cameraController.value.aspectRatio,
           child: CameraPreview(
