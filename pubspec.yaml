@@ -1,0 +1,19 @@
+name: flutter_camera_ml_vision
+description: A new Flutter package project.
+version: 1.0.0
+author:
+homepage:
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_ml_vision: ^0.7.0
+  camera: ^0.4.3+2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+    
