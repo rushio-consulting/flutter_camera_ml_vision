@@ -75,6 +75,7 @@ class ScanPage extends StatefulWidget {
 }
 
 class _ScanPageState extends State<ScanPage> {
+  bool resultSent = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,9 +85,10 @@ class _ScanPageState extends State<ScanPage> {
           child: CameraMlVision(
             detector: FirebaseVision.instance.barcodeDetector().detectInImage,
             onResult: (List<Barcode> barcodes) {
-              if (!mounted) {
+              if (!mounted || resultSent) {
                 return;
               }
+              resultSent = true;
               Navigator.of(context).pop<Barcode>(barcodes.first);
             },
           ),
