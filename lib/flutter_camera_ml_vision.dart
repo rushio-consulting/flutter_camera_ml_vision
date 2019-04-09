@@ -1,111 +1,100 @@
 library flutter_camera_ml_vision;
 
 import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:camera/camera.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
-import 'package:flutter/widgets.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
+part 'utils.dart';
+
+typedef HandleDetection<T> = Future<T> Function(FirebaseVisionImage image);
+typedef WidgetBuilder = Widget Function(BuildContext);
 
 enum CameraMlVisionState {
   loading,
   noCamera,
+  error,
   ready,
 }
 
-typedef FutureOr<bool> OnBarcode(Barcode barcode);
+class CameraMlVision<T> extends StatefulWidget {
+  final HandleDetection<T> detector;
+  final Function(T) onResult;
+  final WidgetBuilder loadingBuilder;
+  final WidgetBuilder errorBuilder;
 
-class BarcodeCameraMlVision extends StatefulWidget {
-  final BarcodeFormat barcodeFormat;
-  final ValueChanged<Barcode> onBarcode;
-
-  BarcodeCameraMlVision({
-    this.barcodeFormat: BarcodeFormat.all,
-    @required this.onBarcode,
+  CameraMlVision({
+    @required this.onResult,
+    this.detector,
+    this.loadingBuilder,
+    this.errorBuilder,
   });
 
   @override
-  _BarcodeCameraMlVisionState createState() => _BarcodeCameraMlVisionState();
+  _CameraMlVisionState createState() => _CameraMlVisionState<T>();
 }
 
-class _BarcodeCameraMlVisionState extends State<BarcodeCameraMlVision> {
-  final _barcodeController = StreamController<Barcode>();
-
-  BarcodeDetector _barcodeDetector;
+class _CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   CameraController _cameraController;
+  HandleDetection detector;
   CameraMlVisionState _cameraMlVisionState = CameraMlVisionState.loading;
   bool _alreadyCheckingImage = false;
-  StreamSubscription<Barcode> _barcodeSubscription;
-
-  Future<void> _dispose() async {
-    await _cameraController.stopImageStream();
-    await _cameraController.dispose();
-  }
-
-  @override
-  void dispose() {
-    _dispose();
-    _barcodeController.close();
-    _barcodeSubscription.cancel();
-    super.dispose();
-  }
 
   @override
   void initState() {
     super.initState();
-    _barcodeDetector = FirebaseVision.instance.barcodeDetector(
-      BarcodeDetectorOptions(
-        barcodeFormats: widget.barcodeFormat,
-      ),
-    );
+
+    final FirebaseVision mlVision = FirebaseVision.instance;
+    detector = widget.detector ?? mlVision.barcodeDetector().detectInImage;
     _initialize();
   }
 
   Future<void> _initialize() async {
-    final cameras = await availableCameras();
-    if (cameras.isEmpty) {
+    CameraDescription description = await _getCamera(CameraLensDirection.back);
+    if (description == null) {
       _cameraMlVisionState = CameraMlVisionState.noCamera;
       return;
     }
-    _cameraController =
-        CameraController(cameras.first, ResolutionPreset.medium);
+    _cameraController = CameraController(description, ResolutionPreset.medium);
     if (!mounted) {
       return;
     }
-    await _cameraController.initialize();
+
+    try {
+      await _cameraController.initialize();
+    } catch (ex, stack) {
+      setState(() {
+        _cameraMlVisionState = CameraMlVisionState.error;
+      });
+      debugPrint('Can\'t initialize camera');
+      debugPrint('$ex, $stack');
+      return;
+    }
     setState(() {
       _cameraMlVisionState = CameraMlVisionState.ready;
     });
-    _barcodeSubscription = _barcodeController.stream
-        .transform(DebounceStreamTransformer(Duration(milliseconds: 500)))
-        .listen((barcode) {
-      widget.onBarcode(barcode);
-    });
+    ImageRotation rotation = _rotationIntToImageRotation(
+      description.sensorOrientation,
+    );
 
     _cameraController.startImageStream((cameraImage) async {
       if (!_alreadyCheckingImage) {
         _alreadyCheckingImage = true;
-        final image = FirebaseVisionImage.fromBytes(
-          cameraImage.planes.first.bytes,
-          FirebaseVisionImageMetadata(
-            planeData: [
-              FirebaseVisionImagePlaneMetadata(
-                bytesPerRow: cameraImage.planes.first.bytesPerRow,
-                height: cameraImage.planes.first.height,
-                width: cameraImage.planes.first.width,
-              ),
-            ],
-            rawFormat: cameraImage.format.raw,
-            size: Size(
-              cameraImage.width.toDouble(),
-              cameraImage.height.toDouble(),
-            ),
-          ),
-        );
-        final List<Barcode> barcodes =
-            await _barcodeDetector.detectInImage(image);
-        for (Barcode barcode in barcodes) {
-          _barcodeController.add(barcode);
+        try {
+          final T results = await _detect<T>(cameraImage, detector, rotation);
+          if (results != null) {
+            if (results is List && results.length > 0) {
+              widget.onResult(results);
+            } else if (results is! List) {
+              widget.onResult(results);
+            }
+          }
+        } catch (ex, stack) {
+          debugPrint('$ex, $stack');
         }
         _alreadyCheckingImage = false;
       }
@@ -115,19 +104,16 @@ class _BarcodeCameraMlVisionState extends State<BarcodeCameraMlVision> {
   @override
   Widget build(BuildContext context) {
     if (_cameraMlVisionState == CameraMlVisionState.loading) {
-      //  TODO: add a way to let the user to add it's own loading screen
-      return Container();
+      return widget.loadingBuilder == null ? Center(child: CircularProgressIndicator()) : widget.loadingBuilder(context);
     }
-    if (_cameraMlVisionState == CameraMlVisionState.noCamera) {
-      //  TODO: add a better message when no camera available
-      return Text('no camera available');
+    if (_cameraMlVisionState == CameraMlVisionState.noCamera || _cameraMlVisionState == CameraMlVisionState.error) {
+      return widget.errorBuilder == null ? Center(child: Text('$_cameraMlVisionState')) : widget.errorBuilder(context);
     }
     return FittedBox(
       alignment: Alignment.center,
       fit: BoxFit.cover,
       child: SizedBox(
-        width: _cameraController.value.previewSize.height *
-            _cameraController.value.aspectRatio,
+        width: _cameraController.value.previewSize.height * _cameraController.value.aspectRatio,
         height: _cameraController.value.previewSize.height,
         child: AspectRatio(
           aspectRatio: _cameraController.value.aspectRatio,

@@ -13,3 +13,6 @@ ios/Flutter/Generated.xcconfig
 ios/Runner/GeneratedPluginRegistrant.*
 
 google-services.json
+.idea/
+/example/ios/GoogleService-Info.plist
+/example/ios/Runner/GoogleService-Info.plist

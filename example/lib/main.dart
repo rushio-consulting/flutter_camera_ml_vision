@@ -81,13 +81,13 @@ class _ScanPageState extends State<ScanPage> {
       body: SafeArea(
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
-          child: BarcodeCameraMlVision(
-            barcodeFormat: BarcodeFormat.qrCode,
-            onBarcode: (barcode) {
+          child: CameraMlVision(
+            detector: FirebaseVision.instance.barcodeDetector().detectInImage,
+            onResult: (List<Barcode> barcodes) {
               if (!mounted) {
                 return;
               }
-              Navigator.of(context).pop<Barcode>(barcode);
+              Navigator.of(context).pop<Barcode>(barcodes.first);
             },
           ),
         ),
