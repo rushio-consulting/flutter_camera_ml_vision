@@ -1,141 +1,219 @@
 library flutter_camera_ml_vision;
 
 import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:camera/camera.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
-import 'package:flutter/widgets.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
-enum CameraMlVisionState {
+part 'utils.dart';
+
+typedef HandleDetection<T> = Future<T> Function(FirebaseVisionImage image);
+typedef WidgetBuilder = Widget Function(BuildContext);
+
+enum _CameraState {
   loading,
   noCamera,
+  error,
   ready,
 }
 
-typedef FutureOr<bool> OnBarcode(Barcode barcode);
+class CameraMlVision<T> extends StatefulWidget {
+  final HandleDetection<T> detector;
+  final Function(T) onResult;
+  final WidgetBuilder loadingBuilder;
+  final WidgetBuilder errorBuilder;
 
-class BarcodeCameraMlVision extends StatefulWidget {
-  final BarcodeFormat barcodeFormat;
-  final ValueChanged<Barcode> onBarcode;
-
-  BarcodeCameraMlVision({
-    this.barcodeFormat: BarcodeFormat.all,
-    @required this.onBarcode,
-  });
+  CameraMlVision({
+    Key key,
+    @required this.onResult,
+    this.detector,
+    this.loadingBuilder,
+    this.errorBuilder,
+  }) : super(key: key);
 
   @override
-  _BarcodeCameraMlVisionState createState() => _BarcodeCameraMlVisionState();
+  CameraMlVisionState createState() => CameraMlVisionState<T>();
 }
 
-class _BarcodeCameraMlVisionState extends State<BarcodeCameraMlVision> {
-  final _barcodeController = StreamController<Barcode>();
-
-  BarcodeDetector _barcodeDetector;
+class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
+  String _lastImage;
   CameraController _cameraController;
-  CameraMlVisionState _cameraMlVisionState = CameraMlVisionState.loading;
+  HandleDetection _detector;
+  ImageRotation _rotation;
+  _CameraState _cameraMlVisionState = _CameraState.loading;
   bool _alreadyCheckingImage = false;
-  StreamSubscription<Barcode> _barcodeSubscription;
-
-  Future<void> _dispose() async {
-    await _cameraController.stopImageStream();
-    await _cameraController.dispose();
-  }
-
-  @override
-  void dispose() {
-    _dispose();
-    _barcodeController.close();
-    _barcodeSubscription.cancel();
-    super.dispose();
-  }
+  bool _isStreaming = false;
+  bool _isDeactivate = false;
 
   @override
   void initState() {
     super.initState();
-    _barcodeDetector = FirebaseVision.instance.barcodeDetector(
-      BarcodeDetectorOptions(
-        barcodeFormats: widget.barcodeFormat,
-      ),
-    );
+
+    final FirebaseVision mlVision = FirebaseVision.instance;
+    _detector = widget.detector ?? mlVision.barcodeDetector().detectInImage;
     _initialize();
   }
 
+  Future<void> stop() async {
+    if (_lastImage != null && File(_lastImage).existsSync()) {
+      await File(_lastImage).delete();
+    }
+
+    Directory tempDir = await getTemporaryDirectory();
+    _lastImage = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}';
+    await _cameraController.takePicture(_lastImage);
+
+    await _stop(false);
+  }
+
+  Future<void> _stop(bool silently) async {
+    if (_cameraController.value.isStreamingImages) {
+      _cameraController.stopImageStream();
+    }
+
+    if (silently) {
+      _isStreaming = false;
+    } else {
+      setState(() {
+        _isStreaming = false;
+      });
+    }
+  }
+
+  void start() {
+    _start(false);
+  }
+
+  void _start(bool silently) {
+    _cameraController.startImageStream(_processImage);
+    if (silently) {
+      _isStreaming = true;
+    } else {
+      setState(() {
+        _isStreaming = true;
+      });
+    }
+  }
+
   Future<void> _initialize() async {
-    final cameras = await availableCameras();
-    if (cameras.isEmpty) {
-      _cameraMlVisionState = CameraMlVisionState.noCamera;
+    CameraDescription description = await _getCamera(CameraLensDirection.back);
+    if (description == null) {
+      _cameraMlVisionState = _CameraState.noCamera;
       return;
     }
-    _cameraController =
-        CameraController(cameras.first, ResolutionPreset.medium);
+    _cameraController = CameraController(description, Platform.isIOS ? ResolutionPreset.low : ResolutionPreset.medium);
     if (!mounted) {
       return;
     }
-    await _cameraController.initialize();
-    setState(() {
-      _cameraMlVisionState = CameraMlVisionState.ready;
-    });
-    _barcodeSubscription = _barcodeController.stream
-        .transform(DebounceStreamTransformer(Duration(milliseconds: 500)))
-        .listen((barcode) {
-      widget.onBarcode(barcode);
-    });
 
-    _cameraController.startImageStream((cameraImage) async {
-      if (!_alreadyCheckingImage) {
-        _alreadyCheckingImage = true;
-        final image = FirebaseVisionImage.fromBytes(
-          cameraImage.planes.first.bytes,
-          FirebaseVisionImageMetadata(
-            planeData: [
-              FirebaseVisionImagePlaneMetadata(
-                bytesPerRow: cameraImage.planes.first.bytesPerRow,
-                height: cameraImage.planes.first.height,
-                width: cameraImage.planes.first.width,
-              ),
-            ],
-            rawFormat: cameraImage.format.raw,
-            size: Size(
-              cameraImage.width.toDouble(),
-              cameraImage.height.toDouble(),
-            ),
-          ),
-        );
-        final List<Barcode> barcodes =
-            await _barcodeDetector.detectInImage(image);
-        for (Barcode barcode in barcodes) {
-          _barcodeController.add(barcode);
-        }
-        _alreadyCheckingImage = false;
-      }
+    try {
+      await _cameraController.initialize();
+    } catch (ex, stack) {
+      setState(() {
+        _cameraMlVisionState = _CameraState.error;
+      });
+      debugPrint('Can\'t initialize camera');
+      debugPrint('$ex, $stack');
+      return;
+    }
+    setState(() {
+      _cameraMlVisionState = _CameraState.ready;
     });
+    _rotation = _rotationIntToImageRotation(
+      description.sensorOrientation,
+    );
+
+    start();
+  }
+
+  @override
+  void deactivate() {
+    if (_isDeactivate) {
+      _isDeactivate = false;
+      _start(true);
+    } else {
+      _isDeactivate = true;
+      _stop(true);
+    }
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    if (_lastImage != null && File(_lastImage).existsSync()) {
+      File(_lastImage).delete();
+    }
+    _cameraController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_cameraMlVisionState == CameraMlVisionState.loading) {
-      //  TODO: add a way to let the user to add it's own loading screen
-      return Container();
+    if (_cameraMlVisionState == _CameraState.loading) {
+      return widget.loadingBuilder == null ? Center(child: CircularProgressIndicator()) : widget.loadingBuilder(context);
     }
-    if (_cameraMlVisionState == CameraMlVisionState.noCamera) {
-      //  TODO: add a better message when no camera available
-      return Text('no camera available');
+    if (_cameraMlVisionState == _CameraState.noCamera || _cameraMlVisionState == _CameraState.error) {
+      return widget.errorBuilder == null ? Center(child: Text('$_cameraMlVisionState')) : widget.errorBuilder(context);
     }
     return FittedBox(
       alignment: Alignment.center,
       fit: BoxFit.cover,
       child: SizedBox(
-        width: _cameraController.value.previewSize.height *
-            _cameraController.value.aspectRatio,
+        width: _cameraController.value.previewSize.height * _cameraController.value.aspectRatio,
         height: _cameraController.value.previewSize.height,
         child: AspectRatio(
           aspectRatio: _cameraController.value.aspectRatio,
-          child: CameraPreview(
-            _cameraController,
-          ),
+          child: _isStreaming
+              ? CameraPreview(
+                  _cameraController,
+                )
+              : _getPicture(),
         ),
       ),
     );
+  }
+
+  _processImage(CameraImage cameraImage) async {
+    if (!_alreadyCheckingImage) {
+      _alreadyCheckingImage = true;
+      try {
+        final T results = await _detect<T>(cameraImage, _detector, _rotation);
+        if (results != null) {
+          if (results is List && results.length > 0) {
+            widget.onResult(results);
+          } else if (results is! List) {
+            widget.onResult(results);
+          }
+        }
+      } catch (ex, stack) {
+        debugPrint('$ex, $stack');
+      }
+      _alreadyCheckingImage = false;
+    }
+  }
+
+  void toggle() {
+    if (_isStreaming) {
+      stop();
+    } else {
+      start();
+    }
+  }
+
+  Widget _getPicture() {
+    if (_lastImage != null) {
+      final file = File(_lastImage);
+      if (file.existsSync()) {
+        return Image.file(file);
+      }
+    }
+
+    return Container();
   }
 }
