@@ -18,6 +18,7 @@ typedef HandleDetection<T> = Future<T> Function(FirebaseVisionImage image);
 typedef Widget ErrorWidgetBuilder(BuildContext context, CameraError error);
 
 enum CameraError {
+  unknown,
   cantInitializeCamera,
   androidVersionNotSupported,
   noCameraAvailable,
@@ -54,7 +55,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   HandleDetection _detector;
   ImageRotation _rotation;
   _CameraState _cameraMlVisionState = _CameraState.loading;
-  CameraError _cameraError;
+  CameraError _cameraError = CameraError.unknown;
   bool _alreadyCheckingImage = false;
   bool _isStreaming = false;
   bool _isDeactivate = false;
