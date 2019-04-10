@@ -16,7 +16,7 @@ dependencies:
   firebase_ml_vision: ^0.7.0
   path_provider: ^0.5.0+1
   camera: ^0.4.3+2
-  pedantic: ^1.5.0
+  pedantic: ^1.4.0
 
 dev_dependencies:
   flutter_test:
