@@ -75,7 +75,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
 
   Future<void> _stop(bool silently) async {
     if (_cameraController.value.isStreamingImages) {
-      unawaited(_cameraController.stopImageStream());
+      await _cameraController.stopImageStream();
     }
 
     if (silently) {
