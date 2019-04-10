@@ -1,16 +1,101 @@
-# example
+```dart
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_camera_ml_vision/flutter_camera_ml_vision.dart';
 
-A new Flutter project.
+void main() => runApp(MyApp());
 
-## Getting Started
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: MyHomePage(title: 'Flutter Demo Home Page'),
+    );
+  }
+}
 
-This project is a starting point for a Flutter application.
+class MyHomePage extends StatefulWidget {
+  MyHomePage({Key key, this.title}) : super(key: key);
 
-A few resources to get you started if this is your first Flutter project:
+  final String title;
 
-- [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+class _MyHomePageState extends State<MyHomePage> {
+  List<String> data = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          RaisedButton(
+            child: Text('Scan product'),
+            onPressed: () async {
+              final barcode = await Navigator.of(context).push<Barcode>(
+                MaterialPageRoute(
+                  builder: (c) {
+                    return ScanPage();
+                  },
+                ),
+              );
+              if (barcode == null) {
+                return;
+              }
+
+              setState(() {
+                data.add(barcode.displayValue);
+              });
+            },
+          ),
+          Expanded(
+            child: ListView(
+              children: data.map((d) => Text(d)).toList(),
+            ),
+          ),
+        ],
+      ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class ScanPage extends StatefulWidget {
+  @override
+  _ScanPageState createState() => _ScanPageState();
+}
+
+class _ScanPageState extends State<ScanPage> {
+  bool resultSent = false;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          child: CameraMlVision<List<Barcode>>(
+            detector: FirebaseVision.instance.barcodeDetector().detectInImage,
+            onResult: (List<Barcode> barcodes) {
+              if (!mounted || resultSent) {
+                return;
+              }
+              resultSent = true;
+              Navigator.of(context).pop<Barcode>(barcodes.first);
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+```
