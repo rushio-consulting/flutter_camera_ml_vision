@@ -188,7 +188,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
     if (_cameraMlVisionState == _CameraState.noCamera ||
         _cameraMlVisionState == _CameraState.error) {
       return widget.errorBuilder == null
-          ? Center(child: Text('$_cameraMlVisionState'))
+          ? Center(child: Text('$_cameraMlVisionState $_cameraError'))
           : widget.errorBuilder(context, _cameraError);
     }
     return FittedBox(
