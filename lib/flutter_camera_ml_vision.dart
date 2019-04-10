@@ -26,7 +26,6 @@ enum CameraError {
 
 enum _CameraState {
   loading,
-  noCamera,
   error,
   ready,
 }
@@ -124,7 +123,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
 
     CameraDescription description = await _getCamera(CameraLensDirection.back);
     if (description == null) {
-      _cameraMlVisionState = _CameraState.noCamera;
+      _cameraMlVisionState = _CameraState.error;
       _cameraError = CameraError.noCameraAvailable;
 
       return;
@@ -185,8 +184,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
           ? Center(child: CircularProgressIndicator())
           : widget.loadingBuilder(context);
     }
-    if (_cameraMlVisionState == _CameraState.noCamera ||
-        _cameraMlVisionState == _CameraState.error) {
+    if (_cameraMlVisionState == _CameraState.error) {
       return widget.errorBuilder == null
           ? Center(child: Text('$_cameraMlVisionState $_cameraError'))
           : widget.errorBuilder(context, _cameraError);
