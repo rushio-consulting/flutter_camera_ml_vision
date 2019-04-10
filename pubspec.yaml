@@ -15,7 +15,13 @@ dependencies:
     sdk: flutter
   firebase_ml_vision: ^0.7.0
   path_provider: ^0.5.0+1
-  camera: ^0.4.3+2
+  #camera: ^0.4.3+2
+  camera: #^4.0.0+1
+    #path: '../plugins/packages/camera'
+    git:
+      url: https://github.com/jaumard/plugins
+      ref: feature/camera_api_16_installation
+      path: packages/camera
   pedantic: ^1.4.0
   device_info: ^0.4.0+1
 

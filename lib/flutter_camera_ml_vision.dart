@@ -69,15 +69,19 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   }
 
   Future<void> stop() async {
-    if (_lastImage != null && File(_lastImage).existsSync()) {
-      await File(_lastImage).delete();
+    if(_cameraController != null) {
+      if (_lastImage != null && File(_lastImage).existsSync()) {
+        await File(_lastImage).delete();
+      }
+
+      Directory tempDir = await getTemporaryDirectory();
+      _lastImage = '${tempDir.path}/${DateTime
+          .now()
+          .millisecondsSinceEpoch}';
+      await _cameraController.takePicture(_lastImage);
+
+      await _stop(false);
     }
-
-    Directory tempDir = await getTemporaryDirectory();
-    _lastImage = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}';
-    await _cameraController.takePicture(_lastImage);
-
-    await _stop(false);
   }
 
   Future<void> _stop(bool silently) async {
@@ -95,7 +99,9 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   }
 
   void start() {
-    _start(false);
+    if(_cameraController != null) {
+      _start(false);
+    }
   }
 
   void _start(bool silently) {
@@ -115,8 +121,10 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
       final androidInfo = await deviceInfo.androidInfo;
       if (androidInfo.version.sdkInt < 21) {
         debugPrint('Camera plugin doesn\'t support android under version 21');
-        _cameraMlVisionState = _CameraState.error;
-        _cameraError = CameraError.androidVersionNotSupported;
+        setState(() {
+          _cameraMlVisionState = _CameraState.error;
+          _cameraError = CameraError.androidVersionNotSupported;
+        });
         return;
       }
     }
@@ -158,12 +166,14 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
 
   @override
   void deactivate() {
-    if (_isDeactivate) {
-      _isDeactivate = false;
-      _start(true);
-    } else {
-      _isDeactivate = true;
-      _stop(true);
+    if(_cameraController != null) {
+      if (_isDeactivate) {
+        _isDeactivate = false;
+        _start(true);
+      } else {
+        _isDeactivate = true;
+        _stop(true);
+      }
     }
     super.deactivate();
   }
@@ -173,7 +183,9 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
     if (_lastImage != null && File(_lastImage).existsSync()) {
       File(_lastImage).delete();
     }
-    _cameraController.dispose();
+    if(_cameraController != null) {
+      _cameraController.dispose();
+    }
     super.dispose();
   }
 
