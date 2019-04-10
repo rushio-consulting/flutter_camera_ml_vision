@@ -6,16 +6,22 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:camera/camera.dart';
+import 'package:device_info/device_info.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:pedantic/pedantic.dart';
 
 part 'utils.dart';
 
 typedef HandleDetection<T> = Future<T> Function(FirebaseVisionImage image);
-typedef WidgetBuilder = Widget Function(BuildContext);
+typedef Widget ErrorWidgetBuilder(BuildContext context, CameraError error);
+
+enum CameraError {
+  cantInitializeCamera,
+  androidVersionNotSupported,
+  noCameraAvailable,
+}
 
 enum _CameraState {
   loading,
@@ -28,7 +34,7 @@ class CameraMlVision<T> extends StatefulWidget {
   final HandleDetection<T> detector;
   final Function(T) onResult;
   final WidgetBuilder loadingBuilder;
-  final WidgetBuilder errorBuilder;
+  final ErrorWidgetBuilder errorBuilder;
 
   CameraMlVision({
     Key key,
@@ -48,6 +54,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   HandleDetection _detector;
   ImageRotation _rotation;
   _CameraState _cameraMlVisionState = _CameraState.loading;
+  CameraError _cameraError;
   bool _alreadyCheckingImage = false;
   bool _isStreaming = false;
   bool _isDeactivate = false;
@@ -103,9 +110,22 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   }
 
   Future<void> _initialize() async {
+    if (Platform.isAndroid) {
+      final deviceInfo = DeviceInfoPlugin();
+      final androidInfo = await deviceInfo.androidInfo;
+      if (androidInfo.version.sdkInt < 21) {
+        debugPrint('Camera plugin doesn\'t support android under version 21');
+        _cameraMlVisionState = _CameraState.error;
+        _cameraError = CameraError.androidVersionNotSupported;
+        return;
+      }
+    }
+
     CameraDescription description = await _getCamera(CameraLensDirection.back);
     if (description == null) {
       _cameraMlVisionState = _CameraState.noCamera;
+      _cameraError = CameraError.noCameraAvailable;
+
       return;
     }
     _cameraController = CameraController(description,
@@ -119,11 +139,13 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
     } catch (ex, stack) {
       setState(() {
         _cameraMlVisionState = _CameraState.error;
+        _cameraError = CameraError.cantInitializeCamera;
       });
       debugPrint('Can\'t initialize camera');
       debugPrint('$ex, $stack');
       return;
     }
+
     setState(() {
       _cameraMlVisionState = _CameraState.ready;
     });
@@ -166,7 +188,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
         _cameraMlVisionState == _CameraState.error) {
       return widget.errorBuilder == null
           ? Center(child: Text('$_cameraMlVisionState'))
-          : widget.errorBuilder(context);
+          : widget.errorBuilder(context, _cameraError);
     }
     return FittedBox(
       alignment: Alignment.center,
