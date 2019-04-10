@@ -1,6 +1,7 @@
 library flutter_camera_ml_vision;
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -8,13 +9,14 @@ import 'package:camera/camera.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 part 'utils.dart';
 
 typedef HandleDetection<T> = Future<T> Function(FirebaseVisionImage image);
 typedef WidgetBuilder = Widget Function(BuildContext);
 
-enum CameraMlVisionState {
+enum _CameraState {
   loading,
   noCamera,
   error,
@@ -28,38 +30,84 @@ class CameraMlVision<T> extends StatefulWidget {
   final WidgetBuilder errorBuilder;
 
   CameraMlVision({
+    Key key,
     @required this.onResult,
     this.detector,
     this.loadingBuilder,
     this.errorBuilder,
-  });
+  }) : super(key: key);
 
   @override
-  _CameraMlVisionState createState() => _CameraMlVisionState<T>();
+  CameraMlVisionState createState() => CameraMlVisionState<T>();
 }
 
-class _CameraMlVisionState<T> extends State<CameraMlVision<T>> {
+class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
+  String _lastImage;
   CameraController _cameraController;
-  HandleDetection detector;
-  CameraMlVisionState _cameraMlVisionState = CameraMlVisionState.loading;
+  HandleDetection _detector;
+  ImageRotation _rotation;
+  _CameraState _cameraMlVisionState = _CameraState.loading;
   bool _alreadyCheckingImage = false;
+  bool _isStreaming = false;
+  bool _isDeactivate = false;
 
   @override
   void initState() {
     super.initState();
 
     final FirebaseVision mlVision = FirebaseVision.instance;
-    detector = widget.detector ?? mlVision.barcodeDetector().detectInImage;
+    _detector = widget.detector ?? mlVision.barcodeDetector().detectInImage;
     _initialize();
+  }
+
+  Future<void> stop() async {
+    if (_lastImage != null && File(_lastImage).existsSync()) {
+      await File(_lastImage).delete();
+    }
+
+    Directory tempDir = await getTemporaryDirectory();
+    _lastImage = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}';
+    await _cameraController.takePicture(_lastImage);
+
+    await _stop(false);
+  }
+
+  Future<void> _stop(bool silently) async {
+    if (_cameraController.value.isStreamingImages) {
+      _cameraController.stopImageStream();
+    }
+
+    if (silently) {
+      _isStreaming = false;
+    } else {
+      setState(() {
+        _isStreaming = false;
+      });
+    }
+  }
+
+  void start() {
+    _start(false);
+  }
+
+  void _start(bool silently) {
+    _cameraController.startImageStream(_processImage);
+    if (silently) {
+      _isStreaming = true;
+    } else {
+      setState(() {
+        _isStreaming = true;
+      });
+    }
   }
 
   Future<void> _initialize() async {
     CameraDescription description = await _getCamera(CameraLensDirection.back);
     if (description == null) {
-      _cameraMlVisionState = CameraMlVisionState.noCamera;
+      _cameraMlVisionState = _CameraState.noCamera;
       return;
     }
-    _cameraController = CameraController(description, ResolutionPreset.medium);
+    _cameraController = CameraController(description, Platform.isIOS ? ResolutionPreset.low : ResolutionPreset.medium);
     if (!mounted) {
       return;
     }
@@ -68,45 +116,49 @@ class _CameraMlVisionState<T> extends State<CameraMlVision<T>> {
       await _cameraController.initialize();
     } catch (ex, stack) {
       setState(() {
-        _cameraMlVisionState = CameraMlVisionState.error;
+        _cameraMlVisionState = _CameraState.error;
       });
       debugPrint('Can\'t initialize camera');
       debugPrint('$ex, $stack');
       return;
     }
     setState(() {
-      _cameraMlVisionState = CameraMlVisionState.ready;
+      _cameraMlVisionState = _CameraState.ready;
     });
-    ImageRotation rotation = _rotationIntToImageRotation(
+    _rotation = _rotationIntToImageRotation(
       description.sensorOrientation,
     );
 
-    _cameraController.startImageStream((cameraImage) async {
-      if (!_alreadyCheckingImage) {
-        _alreadyCheckingImage = true;
-        try {
-          final T results = await _detect<T>(cameraImage, detector, rotation);
-          if (results != null) {
-            if (results is List && results.length > 0) {
-              widget.onResult(results);
-            } else if (results is! List) {
-              widget.onResult(results);
-            }
-          }
-        } catch (ex, stack) {
-          debugPrint('$ex, $stack');
-        }
-        _alreadyCheckingImage = false;
-      }
-    });
+    start();
+  }
+
+  @override
+  void deactivate() {
+    if (_isDeactivate) {
+      _isDeactivate = false;
+      _start(true);
+    } else {
+      _isDeactivate = true;
+      _stop(true);
+    }
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    if (_lastImage != null && File(_lastImage).existsSync()) {
+      File(_lastImage).delete();
+    }
+    _cameraController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_cameraMlVisionState == CameraMlVisionState.loading) {
+    if (_cameraMlVisionState == _CameraState.loading) {
       return widget.loadingBuilder == null ? Center(child: CircularProgressIndicator()) : widget.loadingBuilder(context);
     }
-    if (_cameraMlVisionState == CameraMlVisionState.noCamera || _cameraMlVisionState == CameraMlVisionState.error) {
+    if (_cameraMlVisionState == _CameraState.noCamera || _cameraMlVisionState == _CameraState.error) {
       return widget.errorBuilder == null ? Center(child: Text('$_cameraMlVisionState')) : widget.errorBuilder(context);
     }
     return FittedBox(
@@ -117,11 +169,51 @@ class _CameraMlVisionState<T> extends State<CameraMlVision<T>> {
         height: _cameraController.value.previewSize.height,
         child: AspectRatio(
           aspectRatio: _cameraController.value.aspectRatio,
-          child: CameraPreview(
-            _cameraController,
-          ),
+          child: _isStreaming
+              ? CameraPreview(
+                  _cameraController,
+                )
+              : _getPicture(),
         ),
       ),
     );
+  }
+
+  _processImage(CameraImage cameraImage) async {
+    if (!_alreadyCheckingImage) {
+      _alreadyCheckingImage = true;
+      try {
+        final T results = await _detect<T>(cameraImage, _detector, _rotation);
+        if (results != null) {
+          if (results is List && results.length > 0) {
+            widget.onResult(results);
+          } else if (results is! List) {
+            widget.onResult(results);
+          }
+        }
+      } catch (ex, stack) {
+        debugPrint('$ex, $stack');
+      }
+      _alreadyCheckingImage = false;
+    }
+  }
+
+  void toggle() {
+    if (_isStreaming) {
+      stop();
+    } else {
+      start();
+    }
+  }
+
+  Widget _getPicture() {
+    if (_lastImage != null) {
+      final file = File(_lastImage);
+      if (file.existsSync()) {
+        return Image.file(file);
+      }
+    }
+
+    return Container();
   }
 }

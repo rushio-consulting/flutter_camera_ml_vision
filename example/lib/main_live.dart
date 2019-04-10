@@ -28,6 +28,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<String> data = [];
+  final _scanKey = GlobalKey<CameraMlVisionState>();
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +40,9 @@ class _MyHomePageState extends State<MyHomePage> {
         fit: StackFit.expand,
         children: [
           CameraMlVision<List<Barcode>>(
+            key: _scanKey,
             detector: FirebaseVision.instance.barcodeDetector().detectInImage,
-            onResult: (List<Barcode> barcodes) {
+            onResult: (barcodes) {
               if (data.contains(barcodes.first.displayValue) || !mounted) {
                 return;
               }
@@ -51,21 +53,47 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           Container(
             alignment: Alignment.bottomCenter,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: 250),
-              child: Scrollbar(
-                child: ListView(
-                  children: data.map((d) {
-                    return Container(
-                      color: Color(0xAAFFFFFF),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text(d),
-                      ),
-                    );
-                  }).toList(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: 250),
+                  child: Scrollbar(
+                    child: ListView(
+                      children: data.map((d) {
+                        return Container(
+                          color: Color(0xAAFFFFFF),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Text(d),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
                 ),
-              ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    RaisedButton(
+                      onPressed: () {
+                        _scanKey.currentState.toggle();
+                      },
+                      child: Text('Start/Pause camera'),
+                    ),
+                    RaisedButton(
+                      onPressed: () {
+                        _scanKey.currentState.toggle();
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => Scaffold(
+                                  appBar: AppBar(),
+                                )));
+                      },
+                      child: Text('Push new route'),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],

@@ -82,7 +82,7 @@ class _ScanPageState extends State<ScanPage> {
       body: SafeArea(
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
-          child: CameraMlVision(
+          child: CameraMlVision<List<Barcode>>(
             detector: FirebaseVision.instance.barcodeDetector().detectInImage,
             onResult: (List<Barcode> barcodes) {
               if (!mounted || resultSent) {
