@@ -1,5 +1,8 @@
 # Flutter Camera Ml Vision
 
+[![pub package](https://img.shields.io/pub/v/flutter_camera_ml_vision.svg)](https://pub.dartlang.org/packages/flutter_camera_ml_vision)
+
+
 A Flutter package for iOS and Android to show a preview of the camera and detect things with Firebase ML Vision.
 
 ## Installation
