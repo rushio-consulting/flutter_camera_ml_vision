@@ -4,7 +4,7 @@ Future<CameraDescription> _getCamera(CameraLensDirection dir) async {
   return await availableCameras().then(
     (cameras) => cameras.firstWhere(
           (camera) => camera.lensDirection == dir,
-          orElse: () => cameras.length > 0 ? cameras.first : null,
+          orElse: () => cameras.isNotEmpty ? cameras.first : null,
         ),
   );
 }

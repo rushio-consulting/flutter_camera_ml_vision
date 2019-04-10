@@ -10,6 +10,7 @@ import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pedantic/pedantic.dart';
 
 part 'utils.dart';
 
@@ -74,7 +75,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
 
   Future<void> _stop(bool silently) async {
     if (_cameraController.value.isStreamingImages) {
-      _cameraController.stopImageStream();
+      unawaited(_cameraController.stopImageStream());
     }
 
     if (silently) {
@@ -107,7 +108,8 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
       _cameraMlVisionState = _CameraState.noCamera;
       return;
     }
-    _cameraController = CameraController(description, Platform.isIOS ? ResolutionPreset.low : ResolutionPreset.medium);
+    _cameraController = CameraController(description,
+        Platform.isIOS ? ResolutionPreset.low : ResolutionPreset.medium);
     if (!mounted) {
       return;
     }
@@ -156,16 +158,22 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   @override
   Widget build(BuildContext context) {
     if (_cameraMlVisionState == _CameraState.loading) {
-      return widget.loadingBuilder == null ? Center(child: CircularProgressIndicator()) : widget.loadingBuilder(context);
+      return widget.loadingBuilder == null
+          ? Center(child: CircularProgressIndicator())
+          : widget.loadingBuilder(context);
     }
-    if (_cameraMlVisionState == _CameraState.noCamera || _cameraMlVisionState == _CameraState.error) {
-      return widget.errorBuilder == null ? Center(child: Text('$_cameraMlVisionState')) : widget.errorBuilder(context);
+    if (_cameraMlVisionState == _CameraState.noCamera ||
+        _cameraMlVisionState == _CameraState.error) {
+      return widget.errorBuilder == null
+          ? Center(child: Text('$_cameraMlVisionState'))
+          : widget.errorBuilder(context);
     }
     return FittedBox(
       alignment: Alignment.center,
       fit: BoxFit.cover,
       child: SizedBox(
-        width: _cameraController.value.previewSize.height * _cameraController.value.aspectRatio,
+        width: _cameraController.value.previewSize.height *
+            _cameraController.value.aspectRatio,
         height: _cameraController.value.previewSize.height,
         child: AspectRatio(
           aspectRatio: _cameraController.value.aspectRatio,
