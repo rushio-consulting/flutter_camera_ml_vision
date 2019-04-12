@@ -83,11 +83,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     RaisedButton(
                       onPressed: () {
-                        _scanKey.currentState.toggle();
                         Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => Scaffold(
-                                  appBar: AppBar(),
-                                )));
+                            builder: (context) => _SecondScreen()));
                       },
                       child: Text('Push new route'),
                     ),
@@ -98,6 +95,23 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class _SecondScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: RaisedButton(
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => _SecondScreen(),
+          ));
+        },
+        child: Text('Push new route'),
+      ),
     );
   }
 }

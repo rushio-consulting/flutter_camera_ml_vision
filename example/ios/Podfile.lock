@@ -1,6 +1,8 @@
 PODS:
   - camera (0.0.1):
     - Flutter
+  - device_info (0.0.1):
+    - Flutter
   - Firebase/Core (5.20.1):
     - Firebase/CoreOnly
     - FirebaseAnalytics (= 5.8.0)
@@ -103,6 +105,7 @@ PODS:
 
 DEPENDENCIES:
   - camera (from `.symlinks/plugins/camera/ios`)
+  - device_info (from `.symlinks/plugins/device_info/ios`)
   - Firebase/MLVisionBarcodeModel
   - firebase_ml_vision (from `.symlinks/plugins/firebase_ml_vision/ios`)
   - Flutter (from `.symlinks/flutter/ios`)
@@ -129,6 +132,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   camera:
     :path: ".symlinks/plugins/camera/ios"
+  device_info:
+    :path: ".symlinks/plugins/device_info/ios"
   firebase_ml_vision:
     :path: ".symlinks/plugins/firebase_ml_vision/ios"
   Flutter:
@@ -138,6 +143,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   camera: be01db3b2193839f9af56a9db99b7fea444d35f3
+  device_info: 76ce0b32e13034d1883be4a382433648f9dcee63
   Firebase: 2f5235e62f141cb86181c3af0dfe4509706351ac
   firebase_ml_vision: 5f2a0e608d0815849ac035a77d400afc01e0ea81
   FirebaseAnalytics: fd72a26bf8dac84cefba2f0864366f718555a5b0

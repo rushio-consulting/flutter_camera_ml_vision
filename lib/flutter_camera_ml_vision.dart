@@ -10,6 +10,7 @@ import 'package:device_info/device_info.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'utils.dart';
@@ -69,16 +70,18 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   }
 
   Future<void> stop() async {
-    if(_cameraController != null) {
+    if (_cameraController != null) {
       if (_lastImage != null && File(_lastImage).existsSync()) {
         await File(_lastImage).delete();
       }
 
       Directory tempDir = await getTemporaryDirectory();
-      _lastImage = '${tempDir.path}/${DateTime
-          .now()
-          .millisecondsSinceEpoch}';
-      await _cameraController.takePicture(_lastImage);
+      _lastImage = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}';
+      try {
+        await _cameraController.takePicture(_lastImage);
+      } on PlatformException catch (_) {
+        print(_);
+      }
 
       await _stop(false);
     }
@@ -99,7 +102,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   }
 
   void start() {
-    if(_cameraController != null) {
+    if (_cameraController != null) {
       _start(false);
     }
   }
@@ -166,11 +169,12 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
 
   @override
   void deactivate() {
-    if(_cameraController != null) {
-      if (_isDeactivate) {
+    final isCurrentRoute = ModalRoute.of(context).isCurrent;
+    if (_cameraController != null) {
+      if (_isDeactivate && isCurrentRoute) {
         _isDeactivate = false;
         _start(true);
-      } else {
+      } else if (!_isDeactivate) {
         _isDeactivate = true;
         _stop(true);
       }
@@ -183,7 +187,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
     if (_lastImage != null && File(_lastImage).existsSync()) {
       File(_lastImage).delete();
     }
-    if(_cameraController != null) {
+    if (_cameraController != null) {
       _cameraController.dispose();
     }
     super.dispose();
@@ -201,6 +205,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
           ? Center(child: Text('$_cameraMlVisionState $_cameraError'))
           : widget.errorBuilder(context, _cameraError);
     }
+
     return FittedBox(
       alignment: Alignment.center,
       fit: BoxFit.cover,
@@ -240,7 +245,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   }
 
   void toggle() {
-    if (_isStreaming) {
+    if (_isStreaming && _cameraController.value.isStreamingImages) {
       stop();
     } else {
       start();
