@@ -20,10 +20,10 @@ packages:
     description:
       path: "packages/camera"
       ref: "feature/camera_api_16_installation"
-      resolved-ref: a90670a0b60229aa707333e97a352cf2cf5ab050
+      resolved-ref: "301f85e52cbf32dae44510b3f49167133df1ffc2"
       url: "https://github.com/jaumard/plugins"
     source: git
-    version: "0.4.2"
+    version: "0.4.4"
   charcode:
     dependency: transitive
     description:
@@ -167,4 +167,4 @@ packages:
     version: "2.0.8"
 sdks:
   dart: ">=2.1.0 <3.0.0"
-  flutter: ">=0.2.4 <2.0.0"
+  flutter: ">=1.2.0 <2.0.0"
