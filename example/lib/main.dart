@@ -159,7 +159,6 @@ class _ScannerOverlayShape extends ShapeBorder {
   void paint(Canvas canvas, Rect rect, {TextDirection textDirection}) {
     const lineSize = 30;
 
-    print(rect);
     final width = rect.width;
     final borderWidthSize = width * 10 / 100;
     final height = rect.height;
