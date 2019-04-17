@@ -1,3 +1,7 @@
+## [1.3.0] - 17/04/2019
+
+* add overlayBuilder parameter
+
 ## [1.2.0] - 12/04/2019
 
 * fix crash above android api 21.
