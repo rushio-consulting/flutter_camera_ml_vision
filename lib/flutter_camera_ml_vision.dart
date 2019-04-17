@@ -208,42 +208,33 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
           : widget.errorBuilder(context, _cameraError);
     }
 
-    final cameraPreview = FittedBox(
+    Widget cameraPreview = AspectRatio(
+      aspectRatio: _cameraController.value.aspectRatio,
+      child: _isStreaming
+          ? CameraPreview(
+              _cameraController,
+            )
+          : _getPicture(),
+    );
+    if (widget.overlayBuilder != null) {
+      cameraPreview = Stack(
+        fit: StackFit.passthrough,
+        children: [
+          cameraPreview,
+          widget.overlayBuilder(context),
+        ],
+      );
+    }
+    return FittedBox(
       alignment: Alignment.center,
       fit: BoxFit.cover,
       child: SizedBox(
         width: _cameraController.value.previewSize.height *
             _cameraController.value.aspectRatio,
         height: _cameraController.value.previewSize.height,
-        child: AspectRatio(
-          aspectRatio: _cameraController.value.aspectRatio,
-          child: _isStreaming
-              ? CameraPreview(
-                  _cameraController,
-                )
-              : _getPicture(),
-        ),
+        child: cameraPreview,
       ),
     );
-    if (widget.overlayBuilder != null) {
-      return FittedBox(
-        alignment: Alignment.center,
-        fit: BoxFit.cover,
-        child: SizedBox(
-          width: _cameraController.value.previewSize.height *
-              _cameraController.value.aspectRatio,
-          height: _cameraController.value.previewSize.height,
-          child: Stack(
-            fit: StackFit.passthrough,
-            children: [
-              cameraPreview,
-              widget.overlayBuilder(context),
-            ],
-          ),
-        ),
-      );
-    }
-    return cameraPreview;
   }
 
   _processImage(CameraImage cameraImage) async {

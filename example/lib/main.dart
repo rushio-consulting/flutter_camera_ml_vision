@@ -83,7 +83,7 @@ class _ScanPageState extends State<ScanPage> {
     return Scaffold(
       body: SafeArea(
         child: SizedBox(
-          width: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
           child: CameraMlVision<List<Barcode>>(
             overlayBuilder: (c) {
               return Container(
