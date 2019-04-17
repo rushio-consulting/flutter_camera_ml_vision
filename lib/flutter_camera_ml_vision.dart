@@ -36,6 +36,7 @@ class CameraMlVision<T> extends StatefulWidget {
   final Function(T) onResult;
   final WidgetBuilder loadingBuilder;
   final ErrorWidgetBuilder errorBuilder;
+  final WidgetBuilder overlayBuilder;
 
   CameraMlVision({
     Key key,
@@ -43,6 +44,7 @@ class CameraMlVision<T> extends StatefulWidget {
     this.detector,
     this.loadingBuilder,
     this.errorBuilder,
+    this.overlayBuilder,
   }) : super(key: key);
 
   @override
@@ -206,7 +208,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
           : widget.errorBuilder(context, _cameraError);
     }
 
-    return FittedBox(
+    final cameraPreview = FittedBox(
       alignment: Alignment.center,
       fit: BoxFit.cover,
       child: SizedBox(
@@ -223,6 +225,25 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
         ),
       ),
     );
+    if (widget.overlayBuilder != null) {
+      return FittedBox(
+        alignment: Alignment.center,
+        fit: BoxFit.cover,
+        child: SizedBox(
+          width: _cameraController.value.previewSize.height *
+              _cameraController.value.aspectRatio,
+          height: _cameraController.value.previewSize.height,
+          child: Stack(
+            fit: StackFit.passthrough,
+            children: [
+              cameraPreview,
+              widget.overlayBuilder(context),
+            ],
+          ),
+        ),
+      );
+    }
+    return cameraPreview;
   }
 
   _processImage(CameraImage cameraImage) async {
