@@ -37,6 +37,7 @@ class CameraMlVision<T> extends StatefulWidget {
   final WidgetBuilder loadingBuilder;
   final ErrorWidgetBuilder errorBuilder;
   final WidgetBuilder overlayBuilder;
+  final CameraLensDirection cameraLensDirection;
 
   CameraMlVision({
     Key key,
@@ -45,6 +46,7 @@ class CameraMlVision<T> extends StatefulWidget {
     this.loadingBuilder,
     this.errorBuilder,
     this.overlayBuilder,
+    this.cameraLensDirection = CameraLensDirection.back,
   }) : super(key: key);
 
   @override
@@ -134,7 +136,8 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
       }
     }
 
-    CameraDescription description = await _getCamera(CameraLensDirection.back);
+    CameraDescription description =
+        await _getCamera(widget.cameraLensDirection);
     if (description == null) {
       _cameraMlVisionState = _CameraState.error;
       _cameraError = CameraError.noCameraAvailable;

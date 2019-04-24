@@ -1,3 +1,7 @@
+## [1.4.0] - 24/04/2019
+
+* add cameraLensDirection parameter (this default to back)
+
 ## [1.3.0] - 17/04/2019
 
 * add overlayBuilder parameter
