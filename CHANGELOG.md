@@ -1,3 +1,8 @@
+## [1.5.0] - 24/04/2019
+
+* fix installation problems
+* Expose camera value
+
 ## [1.4.0] - 24/04/2019
 
 * add cameraLensDirection parameter (this default to back)
