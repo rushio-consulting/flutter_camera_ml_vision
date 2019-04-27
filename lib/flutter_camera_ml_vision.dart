@@ -122,6 +122,8 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
     }
   }
 
+  CameraValue get cameraValue => _cameraController?.value;
+
   Future<void> _initialize() async {
     if (Platform.isAndroid) {
       final deviceInfo = DeviceInfoPlugin();
