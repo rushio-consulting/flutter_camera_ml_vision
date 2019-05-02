@@ -1,3 +1,7 @@
+## [2.0.0] - 2/05/2019
+
+* We now forward the result from firebase_ml_vision for onResult
+
 ## [1.4.0] - 24/04/2019
 
 * add cameraLensDirection parameter (this default to back)
