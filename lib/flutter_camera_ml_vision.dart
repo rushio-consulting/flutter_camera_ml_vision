@@ -83,8 +83,8 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
       _lastImage = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}';
       try {
         await _cameraController.takePicture(_lastImage);
-      } on PlatformException catch (_) {
-        print(_);
+      } on PlatformException catch (e) {
+        debugPrint('$e');
       }
 
       await _stop(false);
@@ -248,13 +248,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
       _alreadyCheckingImage = true;
       try {
         final T results = await _detect<T>(cameraImage, _detector, _rotation);
-        if (results != null) {
-          if (results is List && results.length > 0) {
-            widget.onResult(results);
-          } else if (results is! List) {
-            widget.onResult(results);
-          }
-        }
+        widget.onResult(results);
       } catch (ex, stack) {
         debugPrint('$ex, $stack');
       }
