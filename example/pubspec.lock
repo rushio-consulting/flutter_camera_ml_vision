@@ -21,7 +21,7 @@ packages:
       path: "packages/camera"
       ref: "feature/camera_api_16_installation"
       resolved-ref: "301f85e52cbf32dae44510b3f49167133df1ffc2"
-      url: "https://github.com/jaumard/plugins"
+      url: "git@github.com:jaumard/plugins.git"
     source: git
     version: "0.4.4"
   charcode:
@@ -70,7 +70,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.5.0"
+    version: "1.5.1"
   flutter_test:
     dependency: "direct dev"
     description: flutter
