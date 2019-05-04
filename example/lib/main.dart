@@ -97,7 +97,10 @@ class _ScanPageState extends State<ScanPage> {
             },
             detector: FirebaseVision.instance.barcodeDetector().detectInImage,
             onResult: (List<Barcode> barcodes) {
-              if (!mounted || resultSent) {
+              if (!mounted ||
+                  resultSent ||
+                  barcodes == null ||
+                  barcodes.isEmpty) {
                 return;
               }
               resultSent = true;
