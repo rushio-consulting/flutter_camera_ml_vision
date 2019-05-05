@@ -91,10 +91,12 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
     }
   }
 
-  Future<void> _stop(bool silently) async {
-    if (_cameraController.value.isStreamingImages) {
-      await _cameraController.stopImageStream();
-    }
+  void _stop(bool silently) {
+    Future.microtask(() async {
+      if (_cameraController?.value?.isStreamingImages == true && mounted) {
+        await _cameraController.stopImageStream();
+      }
+    });
 
     if (silently) {
       _isStreaming = false;
