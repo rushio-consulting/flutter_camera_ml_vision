@@ -83,18 +83,20 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
       _lastImage = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}';
       try {
         await _cameraController.takePicture(_lastImage);
-      } on PlatformException catch (_) {
-        print(_);
+      } on PlatformException catch (e) {
+        debugPrint('$e');
       }
 
       await _stop(false);
     }
   }
 
-  Future<void> _stop(bool silently) async {
-    if (_cameraController.value.isStreamingImages) {
-      await _cameraController.stopImageStream();
-    }
+  void _stop(bool silently) {
+    Future.microtask(() async {
+      if (_cameraController?.value?.isStreamingImages == true && mounted) {
+        await _cameraController.stopImageStream();
+      }
+    });
 
     if (silently) {
       _isStreaming = false;
@@ -123,6 +125,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   }
 
   CameraValue get cameraValue => _cameraController?.value;
+  ImageRotation get imageRotation => _rotation;
 
   Future<void> _initialize() async {
     if (Platform.isAndroid) {
@@ -247,13 +250,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
       _alreadyCheckingImage = true;
       try {
         final T results = await _detect<T>(cameraImage, _detector, _rotation);
-        if (results != null) {
-          if (results is List && results.length > 0) {
-            widget.onResult(results);
-          } else if (results is! List) {
-            widget.onResult(results);
-          }
-        }
+        widget.onResult(results);
       } catch (ex, stack) {
         debugPrint('$ex, $stack');
       }

@@ -43,7 +43,10 @@ class _MyHomePageState extends State<MyHomePage> {
             key: _scanKey,
             detector: FirebaseVision.instance.barcodeDetector().detectInImage,
             onResult: (barcodes) {
-              if (data.contains(barcodes.first.displayValue) || !mounted) {
+              if (barcodes == null ||
+                  barcodes.isEmpty ||
+                  data.contains(barcodes.first.displayValue) ||
+                  !mounted) {
                 return;
               }
               setState(() {

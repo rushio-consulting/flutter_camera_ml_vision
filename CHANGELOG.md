@@ -1,3 +1,11 @@
+## [2.0.1] - 5/05/2019
+
+* fix a crash when poping a route with the camera preview
+
+## [2.0.0] - 2/05/2019
+
+* We now forward the result from firebase_ml_vision for onResult
+
 ## [1.5.0] - 24/04/2019
 
 * fix installation problems

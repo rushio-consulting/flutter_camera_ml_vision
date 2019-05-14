@@ -120,3 +120,10 @@ See the `example` directory for a complete sample app.
 
 Please file feature requests and bugs at the [issue tracker](https://github.com/santetis/flutter_camera_ml_vision/issues).
 
+## Technical Support
+
+For any technical support, don't hesitate to contact us. 
+Find more information in our [website](https://rushio-consulting.fr)
+
+For now, all the issues with the label `support` mean that they come out of the scope of the following project. So you can [contact us](https://rushio-consulting.fr/support) as a support.
+
