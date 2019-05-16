@@ -127,6 +127,15 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   CameraValue get cameraValue => _cameraController?.value;
   ImageRotation get imageRotation => _rotation;
 
+  Future<void> Function() get prepareForVideoRecording =>
+      _cameraController.prepareForVideoRecording;
+  Future<void> Function(String path) get startVideoRecording =>
+      _cameraController.startVideoRecording;
+  Future<void> Function() get stopVideoRecording =>
+      _cameraController.stopVideoRecording;
+  Future<void> Function(String path) get takePicture =>
+      _cameraController.takePicture;
+
   Future<void> _initialize() async {
     if (Platform.isAndroid) {
       final deviceInfo = DeviceInfoPlugin();
