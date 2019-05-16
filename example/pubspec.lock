@@ -58,7 +58,7 @@ packages:
       name: firebase_ml_vision
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.0+2"
+    version: "0.8.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -103,7 +103,7 @@ packages:
       name: path_provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.0+1"
+    version: "1.1.0"
   pedantic:
     dependency: transitive
     description:
