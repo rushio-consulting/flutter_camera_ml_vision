@@ -1,4 +1,4 @@
-## [2.0.2] - 16/05/2019
+## [2.1.0] - 16/05/2019
 
 expose more function from camera controller
 - prepareForVideoRecording
