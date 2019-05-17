@@ -7,7 +7,7 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.2.0"
+    version: "2.1.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -18,12 +18,10 @@ packages:
   camera:
     dependency: "direct main"
     description:
-      path: "packages/camera"
-      ref: "feature/camera_api_16_installation"
-      resolved-ref: "301f85e52cbf32dae44510b3f49167133df1ffc2"
-      url: "https://github.com/jaumard/plugins"
-    source: git
-    version: "0.4.4"
+      name: camera
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.5.1"
   charcode:
     dependency: transitive
     description:
@@ -51,7 +49,7 @@ packages:
       name: firebase_ml_vision
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.0"
+    version: "0.8.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -89,7 +87,7 @@ packages:
       name: path_provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.0+1"
+    version: "1.1.0"
   pedantic:
     dependency: "direct main"
     description:
@@ -103,7 +101,7 @@ packages:
       name: quiver
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.3"
+    version: "2.0.2"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -150,7 +148,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.5"
+    version: "0.2.4"
   typed_data:
     dependency: transitive
     description:

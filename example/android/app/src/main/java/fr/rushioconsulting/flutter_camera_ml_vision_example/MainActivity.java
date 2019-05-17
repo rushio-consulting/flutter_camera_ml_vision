@@ -1,4 +1,4 @@
-package fr.santetis.flutter_camera_ml_vision_example;
+package fr.rushioconsulting.flutter_camera_ml_vision_example;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;

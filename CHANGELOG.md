@@ -1,3 +1,11 @@
+## [2.1.0] - 16/05/2019
+
+expose more function from camera controller
+- prepareForVideoRecording
+- startVideoRecording
+- stopVideoRecording
+- takePicture
+
 ## [2.0.1] - 5/05/2019
 
 * fix a crash when poping a route with the camera preview

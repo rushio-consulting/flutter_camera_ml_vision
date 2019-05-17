@@ -112,6 +112,16 @@ FirebaseVision.instance.textRecognizer().processImage
 
 Then when something is detected the onResult callback is called with the data in the parameter of the function.
 
+### Exposed functionality from CameraController
+
+We expose some functionality from the CameraController class here a a list of these :
+
+- value
+- prepareForVideoRecording
+- startVideoRecording
+- stopVideoRecording
+- takePicture
+
 ## Getting Started
 
 See the `example` directory for a complete sample app.
