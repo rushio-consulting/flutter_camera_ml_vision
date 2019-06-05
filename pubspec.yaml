@@ -1,6 +1,6 @@
 name: flutter_camera_ml_vision
 description: A flutter widget that show the camera stream and allow ML vision recognition on it, it allow you to detect barcodes, labels, text, faces...
-version: 2.1.0
+version: 2.2.0
 authors:
   - Jimmy Aumard <jimmy.aumard@gmail.com>
   - Rushio Consulting <dev@rushio-consulting.fr>
@@ -17,7 +17,7 @@ dependencies:
   path_provider: ^1.1.0
   pedantic: ^1.4.0
   device_info: ^0.4.0+1
-  camera: ^0.5.1
+  camera: ^0.5.2+1
 
 dev_dependencies:
   flutter_test:
