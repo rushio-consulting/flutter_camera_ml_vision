@@ -5,7 +5,7 @@
 
 A Flutter package for iOS and Android to show a preview of the camera and detect things with Firebase ML Vision.
 
-![](videos/scan_page.gif)
+![](videos/scan_page.gif | width=100)
 
 ## Installation
 
