@@ -1,3 +1,7 @@
+## [2.2.1] - 19/06/2019
+
+- fix bug when specifying resolution
+
 ## [2.2.0] - 16/06/2019
 
 - disable audio (#43)
