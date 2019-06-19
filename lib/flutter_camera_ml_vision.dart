@@ -162,9 +162,8 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
     }
     _cameraController = CameraController(
       description,
-      widget.resolution ?? Platform.isIOS
-          ? ResolutionPreset.low
-          : ResolutionPreset.medium,
+      widget.resolution ??
+          (Platform.isIOS ? ResolutionPreset.low : ResolutionPreset.medium),
       enableAudio: false,
     );
     if (!mounted) {
