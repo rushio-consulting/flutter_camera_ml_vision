@@ -1,3 +1,12 @@
+## [2.2.1] - 19/06/2019
+
+- fix bug when specifying resolution
+
+## [2.2.0] - 16/06/2019
+
+- disable audio (#43)
+- let user define camera resolution (#45)
+
 ## [2.1.0] - 16/05/2019
 
 expose more function from camera controller

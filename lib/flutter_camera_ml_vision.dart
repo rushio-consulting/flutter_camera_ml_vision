@@ -38,6 +38,7 @@ class CameraMlVision<T> extends StatefulWidget {
   final ErrorWidgetBuilder errorBuilder;
   final WidgetBuilder overlayBuilder;
   final CameraLensDirection cameraLensDirection;
+  final ResolutionPreset resolution;
 
   CameraMlVision({
     Key key,
@@ -47,6 +48,7 @@ class CameraMlVision<T> extends StatefulWidget {
     this.errorBuilder,
     this.overlayBuilder,
     this.cameraLensDirection = CameraLensDirection.back,
+    this.resolution,
   }) : super(key: key);
 
   @override
@@ -158,8 +160,12 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
 
       return;
     }
-    _cameraController = CameraController(description,
-        Platform.isIOS ? ResolutionPreset.low : ResolutionPreset.medium);
+    _cameraController = CameraController(
+      description,
+      widget.resolution ??
+          (Platform.isIOS ? ResolutionPreset.low : ResolutionPreset.medium),
+      enableAudio: false,
+    );
     if (!mounted) {
       return;
     }
