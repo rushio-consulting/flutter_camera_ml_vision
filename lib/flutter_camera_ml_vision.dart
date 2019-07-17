@@ -142,8 +142,10 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
     await _cameraController.startImageStream(_processImage);
   }
 
-  Future<void> Function(String path) get takePicture =>
-      _cameraController.takePicture;
+  Future<void> takePicture(String path) async {
+    await _cameraController.initialize();
+    await _cameraController.takePicture(path);
+  }
 
   Future<void> _initialize() async {
     if (Platform.isAndroid) {
