@@ -39,16 +39,18 @@ class CameraMlVision<T> extends StatefulWidget {
   final WidgetBuilder overlayBuilder;
   final CameraLensDirection cameraLensDirection;
   final ResolutionPreset resolution;
+  final Function onDispose;
 
   CameraMlVision({
     Key key,
     @required this.onResult,
-    this.detector,
+    @required this.detector,
     this.loadingBuilder,
     this.errorBuilder,
     this.overlayBuilder,
     this.cameraLensDirection = CameraLensDirection.back,
     this.resolution,
+    this.onDispose,
   }) : super(key: key);
 
   @override
@@ -58,7 +60,6 @@ class CameraMlVision<T> extends StatefulWidget {
 class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   String _lastImage;
   CameraController _cameraController;
-  BarcodeDetector _barcodeDetector;
   HandleDetection _detector;
   ImageRotation _rotation;
   _CameraState _cameraMlVisionState = _CameraState.loading;
@@ -70,11 +71,6 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   @override
   void initState() {
     super.initState();
-
-    final FirebaseVision mlVision = FirebaseVision.instance;
-    _barcodeDetector =
-        widget.detector == null ? mlVision.barcodeDetector() : null;
-    _detector = widget.detector ?? _barcodeDetector.detectInImage;
     _initialize();
   }
 
@@ -219,7 +215,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
 
   @override
   void dispose() {
-    _barcodeDetector?.close();
+    if (widget.onDispose != null) widget.onDispose();
     if (_lastImage != null && File(_lastImage).existsSync()) {
       File(_lastImage).delete();
     }
@@ -272,7 +268,6 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   }
 
   _processImage(CameraImage cameraImage) async {
-    if (_isDeactivate) return;
     if (!_alreadyCheckingImage) {
       _alreadyCheckingImage = true;
       try {
