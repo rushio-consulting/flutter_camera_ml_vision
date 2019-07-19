@@ -215,7 +215,9 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
 
   @override
   void dispose() {
-    if (widget.onDispose != null) widget.onDispose();
+    if (widget.onDispose != null) {
+      widget.onDispose();
+    }
     if (_lastImage != null && File(_lastImage).existsSync()) {
       File(_lastImage).delete();
     }
