@@ -31,6 +31,11 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Face> _faces = [];
   final _scanKey = GlobalKey<CameraMlVisionState>();
   CameraLensDirection cameraLensDirection = CameraLensDirection.front;
+  FaceDetector detector =
+      FirebaseVision.instance.faceDetector(FaceDetectorOptions(
+    enableTracking: true,
+    mode: FaceDetectorMode.accurate,
+  ));
 
   @override
   Widget build(BuildContext context) {
@@ -42,12 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: CameraMlVision<List<Face>>(
           key: _scanKey,
           cameraLensDirection: cameraLensDirection,
-          detector: FirebaseVision.instance
-              .faceDetector(FaceDetectorOptions(
-                enableTracking: true,
-                mode: FaceDetectorMode.accurate,
-              ))
-              .processImage,
+          detector: detector.processImage,
           overlayBuilder: (c) {
             return CustomPaint(
               painter: FaceDetectorPainter(
@@ -62,6 +62,9 @@ class _MyHomePageState extends State<MyHomePage> {
             setState(() {
               _faces = []..addAll(faces);
             });
+          },
+          onDispose: () {
+            detector.close();
           },
         ),
       ),
