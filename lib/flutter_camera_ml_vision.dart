@@ -58,6 +58,7 @@ class CameraMlVision<T> extends StatefulWidget {
 class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   String _lastImage;
   CameraController _cameraController;
+  BarcodeDetector _barcodeDetector;
   HandleDetection _detector;
   ImageRotation _rotation;
   _CameraState _cameraMlVisionState = _CameraState.loading;
@@ -71,7 +72,9 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
     super.initState();
 
     final FirebaseVision mlVision = FirebaseVision.instance;
-    _detector = widget.detector ?? mlVision.barcodeDetector().detectInImage;
+    _barcodeDetector =
+        widget.detector == null ? mlVision.barcodeDetector() : null;
+    _detector = widget.detector ?? _barcodeDetector.detectInImage;
     _initialize();
   }
 
@@ -216,6 +219,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
 
   @override
   void dispose() {
+    _barcodeDetector?.close();
     if (_lastImage != null && File(_lastImage).existsSync()) {
       File(_lastImage).delete();
     }
@@ -268,6 +272,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   }
 
   _processImage(CameraImage cameraImage) async {
+    if (_isDeactivate) return;
     if (!_alreadyCheckingImage) {
       _alreadyCheckingImage = true;
       try {
