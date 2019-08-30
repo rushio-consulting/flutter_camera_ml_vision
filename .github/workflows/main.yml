@@ -1,0 +1,18 @@
+name: CI
+
+on: 
+  pull_request:
+    branches:
+    - master
+    
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    container:
+      image: cirrusci/flutter:stable
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Flutter analyze
+      run: flutter analyze
