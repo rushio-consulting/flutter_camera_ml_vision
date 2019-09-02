@@ -14,5 +14,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+    - run: touch /github/home/.flutter
     - name: Flutter analyze
       run: flutter analyze
