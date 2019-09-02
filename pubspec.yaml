@@ -13,11 +13,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  firebase_ml_vision: ^0.8.0
-  path_provider: ^1.1.0
-  pedantic: ^1.4.0
-  device_info: ^0.4.0+1
-  camera: ^0.5.2+1
+  firebase_ml_vision: ^0.8.0+3
+  path_provider: ^1.2.0
+  pedantic: ^1.7.0
+  device_info: ^0.4.0+2
+  camera: ^0.5.4+1
 
 dev_dependencies:
   flutter_test:
