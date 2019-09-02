@@ -1,3 +1,7 @@
+## [2.2.2] - 02/09/2019
+
+- fix black screen on some Android device in profile/release mode
+
 ## [2.2.1] - 19/06/2019
 
 - fix bug when specifying resolution
