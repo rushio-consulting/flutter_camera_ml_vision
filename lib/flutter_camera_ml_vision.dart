@@ -169,8 +169,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
     }
     _cameraController = CameraController(
       description,
-      widget.resolution ??
-          (Platform.isIOS ? ResolutionPreset.low : ResolutionPreset.medium),
+      widget.resolution ?? ResolutionPreset.low, // As the doc says, better to set low when streaming images to avoid drop frames on older devices
       enableAudio: false,
     );
     if (!mounted) {
@@ -196,6 +195,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
       description.sensorOrientation,
     );
 
+    await Future.delayed(Duration(milliseconds: 200));//hacky technique to avoid having black screen on some android devices
     start();
   }
 
