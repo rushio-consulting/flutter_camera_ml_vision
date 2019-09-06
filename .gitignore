@@ -16,3 +16,4 @@ google-services.json
 .idea/
 /example/ios/GoogleService-Info.plist
 /example/ios/Runner/GoogleService-Info.plist
+example/ios/Flutter/flutter_export_environment.sh

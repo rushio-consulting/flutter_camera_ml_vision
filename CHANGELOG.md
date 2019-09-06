@@ -1,3 +1,7 @@
+## [2.2.2] - 02/09/2019
+
+- fix black screen on some Android device in profile/release mode
+
 ## [2.2.1] - 19/06/2019
 
 - fix bug when specifying resolution
@@ -22,6 +26,11 @@ expose more function from camera controller
 ## [2.0.0] - 2/05/2019
 
 * We now forward the result from firebase_ml_vision for onResult
+
+## [1.5.0] - 24/04/2019
+
+* fix installation problems
+* Expose camera value
 
 ## [1.4.0] - 24/04/2019
 
