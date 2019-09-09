@@ -29,6 +29,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   List<String> data = [];
   final _scanKey = GlobalKey<CameraMlVisionState>();
+  BarcodeDetector detector = FirebaseVision.instance.barcodeDetector();
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           CameraMlVision<List<Barcode>>(
             key: _scanKey,
-            detector: FirebaseVision.instance.barcodeDetector().detectInImage,
+            detector: detector.detectInImage,
             onResult: (barcodes) {
               if (barcodes == null ||
                   barcodes.isEmpty ||
@@ -52,6 +53,9 @@ class _MyHomePageState extends State<MyHomePage> {
               setState(() {
                 data.add(barcodes.first.displayValue);
               });
+            },
+            onDispose: () {
+              detector.close();
             },
           ),
           Container(
