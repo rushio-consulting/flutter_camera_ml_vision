@@ -68,6 +68,8 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   bool _isStreaming = false;
   bool _isDeactivate = false;
 
+  CameraController get cameraController => _cameraController;
+  
   @override
   void initState() {
     super.initState();
