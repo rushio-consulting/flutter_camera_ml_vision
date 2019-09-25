@@ -14,5 +14,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: Flutter analyze
-      run: flutter analyze
+    - run: sudo chown -R cirrus:cirrus ./ /github/home/
+    - name: Flutter pub get
+      run: flutter packages get
+    - name: Flutter analyze --suppress-analytics
+      run: flutter analyze --suppress-analytics

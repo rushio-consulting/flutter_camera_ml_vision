@@ -39,16 +39,18 @@ class CameraMlVision<T> extends StatefulWidget {
   final WidgetBuilder overlayBuilder;
   final CameraLensDirection cameraLensDirection;
   final ResolutionPreset resolution;
+  final Function onDispose;
 
   CameraMlVision({
     Key key,
     @required this.onResult,
-    this.detector,
+    @required this.detector,
     this.loadingBuilder,
     this.errorBuilder,
     this.overlayBuilder,
     this.cameraLensDirection = CameraLensDirection.back,
     this.resolution,
+    this.onDispose,
   }) : super(key: key);
 
   @override
@@ -69,9 +71,6 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   @override
   void initState() {
     super.initState();
-
-    final FirebaseVision mlVision = FirebaseVision.instance;
-    _detector = widget.detector ?? mlVision.barcodeDetector().detectInImage;
     _initialize();
   }
 
@@ -216,6 +215,9 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
 
   @override
   void dispose() {
+    if (widget.onDispose != null) {
+      widget.onDispose();
+    }
     if (_lastImage != null && File(_lastImage).existsSync()) {
       File(_lastImage).delete();
     }
