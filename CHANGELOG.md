@@ -1,3 +1,8 @@
+## [2.2.3] - 23/10/2019
+
+- fix crash when setState is called when unmounted
+- update dependencies
+
 ## [2.2.2] - 02/09/2019
 
 - fix black screen on some Android device in profile/release mode
