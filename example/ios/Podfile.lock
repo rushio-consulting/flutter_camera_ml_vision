@@ -142,17 +142,17 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider/ios"
 
 SPEC CHECKSUMS:
-  camera: be01db3b2193839f9af56a9db99b7fea444d35f3
-  device_info: 76ce0b32e13034d1883be4a382433648f9dcee63
+  camera: 38cc83ae9a5667bb5a71c7d9edaf60a91920fd4e
+  device_info: cbf09d2ec12aa7110e0b09fabe54b5bd6c8efe74
   Firebase: fa80b9d987ca014a1ba9357496ef2a0178b28b12
-  firebase_ml_vision: 5f2a0e608d0815849ac035a77d400afc01e0ea81
+  firebase_ml_vision: d09b1eb3c242cf8124db4d51c0927376e3dbd9f4
   FirebaseAnalytics: 1743c5f4de3687d0745709dfdc4b1dea1484f44c
   FirebaseCore: e38f025287b413255a53acc1945d048a112047f7
   FirebaseInstanceID: 0e0348a3c00a734fa376a070f5ad4533ad975cb5
   FirebaseMLCommon: d430756ba2a16bac8fefc81ea416e7f822f052fd
   FirebaseMLVision: 35d0a720334b141d70a55e7e817c1cac23f32285
   FirebaseMLVisionBarcodeModel: 2abf9867e2c9914726c4d0a6936aaf8b75eb7d46
-  Flutter: 9d0fac939486c9aba2809b7982dfdbb47a7b0296
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   GoogleAPIClientForREST: 5447a194eae517986cafe6421a5330b80b820591
   GoogleAppMeasurement: 7f028ea162b72c8f326daec74afc95d94f7a47d6
   GoogleMobileVision: 31cfb4319fd0c03d80105680abd9eae9da5e3b47
@@ -160,9 +160,9 @@ SPEC CHECKSUMS:
   GoogleUtilities: f1faafc033ea203adf1783ce00af455bb99d0e5b
   GTMSessionFetcher: 32aeca0aa144acea523e1c8e053089dec2cb98ca
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
-  path_provider: 09407919825bfe3c2deae39453b7a5b44f467873
+  path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
   Protobuf: 7a877b7f3e5964e3fce995e2eb323dbc6831bb5a
 
 PODFILE CHECKSUM: 389c8036e38c7090e87c697e550157f4e57648d9
 
-COCOAPODS: 1.5.3
+COCOAPODS: 1.6.0
