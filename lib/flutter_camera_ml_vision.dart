@@ -60,7 +60,6 @@ class CameraMlVision<T> extends StatefulWidget {
 class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   String _lastImage;
   CameraController _cameraController;
-  HandleDetection _detector;
   ImageRotation _rotation;
   _CameraState _cameraMlVisionState = _CameraState.loading;
   CameraError _cameraError = CameraError.unknown;
@@ -150,10 +149,12 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
       final androidInfo = await deviceInfo.androidInfo;
       if (androidInfo.version.sdkInt < 21) {
         debugPrint('Camera plugin doesn\'t support android under version 21');
-        setState(() {
-          _cameraMlVisionState = _CameraState.error;
-          _cameraError = CameraError.androidVersionNotSupported;
-        });
+        if (mounted) {
+          setState(() {
+            _cameraMlVisionState = _CameraState.error;
+            _cameraError = CameraError.androidVersionNotSupported;
+          });
+        }
         return;
       }
     }
@@ -178,12 +179,18 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
     try {
       await _cameraController.initialize();
     } catch (ex, stack) {
-      setState(() {
-        _cameraMlVisionState = _CameraState.error;
-        _cameraError = CameraError.cantInitializeCamera;
-      });
       debugPrint('Can\'t initialize camera');
       debugPrint('$ex, $stack');
+      if (mounted) {
+        setState(() {
+          _cameraMlVisionState = _CameraState.error;
+          _cameraError = CameraError.cantInitializeCamera;
+        });
+      }
+      return;
+    }
+
+    if (!mounted) {
       return;
     }
 
@@ -194,7 +201,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
       description.sensorOrientation,
     );
 
-    await Future.delayed(Duration(milliseconds: 200));//hacky technique to avoid having black screen on some android devices
+    await Future.delayed(Duration(milliseconds: 200));//FIXME hacky technique to avoid having black screen on some android devices
     start();
   }
 
@@ -224,6 +231,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
     if (_cameraController != null) {
       _cameraController.dispose();
     }
+    _cameraController = null;
     super.dispose();
   }
 
@@ -269,11 +277,11 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
     );
   }
 
-  _processImage(CameraImage cameraImage) async {
+  void _processImage(CameraImage cameraImage) async {
     if (!_alreadyCheckingImage) {
       _alreadyCheckingImage = true;
       try {
-        final T results = await _detect<T>(cameraImage, _detector, _rotation);
+        final T results = await _detect<T>(cameraImage, widget.detector, _rotation);
         widget.onResult(results);
       } catch (ex, stack) {
         debugPrint('$ex, $stack');
