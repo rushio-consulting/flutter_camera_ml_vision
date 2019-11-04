@@ -1,3 +1,7 @@
+## [2.2.4] - 04/11/2019
+
+- simplify pause stream when not on screen by using VisibilityDetector widget
+
 ## [2.2.3] - 23/10/2019
 
 - fix crash when setState is called when unmounted

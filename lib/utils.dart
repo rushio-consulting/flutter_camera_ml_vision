@@ -3,9 +3,9 @@ part of 'flutter_camera_ml_vision.dart';
 Future<CameraDescription> _getCamera(CameraLensDirection dir) async {
   return await availableCameras().then(
     (cameras) => cameras.firstWhere(
-          (camera) => camera.lensDirection == dir,
-          orElse: () => cameras.isNotEmpty ? cameras.first : null,
-        ),
+      (camera) => camera.lensDirection == dir,
+      orElse: () => cameras.isNotEmpty ? cameras.first : null,
+    ),
   );
 }
 
@@ -26,10 +26,10 @@ FirebaseVisionImageMetadata buildMetaData(
     planeData: image.planes
         .map(
           (plane) => FirebaseVisionImagePlaneMetadata(
-                bytesPerRow: plane.bytesPerRow,
-                height: plane.height,
-                width: plane.width,
-              ),
+            bytesPerRow: plane.bytesPerRow,
+            height: plane.height,
+            width: plane.width,
+          ),
         )
         .toList(),
   );
