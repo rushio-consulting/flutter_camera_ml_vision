@@ -11,6 +11,7 @@ import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_widgets/flutter_widgets.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'utils.dart';
@@ -59,6 +60,7 @@ class CameraMlVision<T> extends StatefulWidget {
 
 class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   String _lastImage;
+  Key _visibilityKey = UniqueKey();
   CameraController _cameraController;
   ImageRotation _rotation;
   _CameraState _cameraMlVisionState = _CameraState.loading;
@@ -87,7 +89,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
         debugPrint('$e');
       }
 
-      await _stop(false);
+      _stop(false);
     }
   }
 
@@ -109,19 +111,15 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
 
   void start() {
     if (_cameraController != null) {
-      _start(false);
+      _start();
     }
   }
 
-  void _start(bool silently) {
+  void _start() {
     _cameraController.startImageStream(_processImage);
-    if (silently) {
+    setState(() {
       _isStreaming = true;
-    } else {
-      setState(() {
-        _isStreaming = true;
-      });
-    }
+    });
   }
 
   CameraValue get cameraValue => _cameraController?.value;
@@ -169,7 +167,9 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
     }
     _cameraController = CameraController(
       description,
-      widget.resolution ?? ResolutionPreset.low, // As the doc says, better to set low when streaming images to avoid drop frames on older devices
+      widget.resolution ??
+          ResolutionPreset
+              .low, // As the doc says, better to set low when streaming images to avoid drop frames on older devices
       enableAudio: false,
     );
     if (!mounted) {
@@ -201,23 +201,9 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
       description.sensorOrientation,
     );
 
-    await Future.delayed(Duration(milliseconds: 200));//FIXME hacky technique to avoid having black screen on some android devices
+    //FIXME hacky technique to avoid having black screen on some android devices
+    await Future.delayed(Duration(milliseconds: 200));
     start();
-  }
-
-  @override
-  void deactivate() {
-    final isCurrentRoute = ModalRoute.of(context).isCurrent;
-    if (_cameraController != null) {
-      if (_isDeactivate && isCurrentRoute) {
-        _isDeactivate = false;
-        _start(true);
-      } else if (!_isDeactivate) {
-        _isDeactivate = true;
-        _stop(true);
-      }
-    }
-    super.deactivate();
   }
 
   @override
@@ -265,23 +251,38 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
         ],
       );
     }
-    return FittedBox(
-      alignment: Alignment.center,
-      fit: BoxFit.cover,
-      child: SizedBox(
-        width: _cameraController.value.previewSize.height *
-            _cameraController.value.aspectRatio,
-        height: _cameraController.value.previewSize.height,
-        child: cameraPreview,
+    return VisibilityDetector(
+      child: FittedBox(
+        alignment: Alignment.center,
+        fit: BoxFit.cover,
+        child: SizedBox(
+          width: _cameraController.value.previewSize.height *
+              _cameraController.value.aspectRatio,
+          height: _cameraController.value.previewSize.height,
+          child: cameraPreview,
+        ),
       ),
+      onVisibilityChanged: (VisibilityInfo info) {
+        if (info.visibleFraction == 0) {
+          //invisible stop the streaming
+          _isDeactivate = true;
+          _stop(true);
+        } else if (_isDeactivate) {
+          //visible restart streaming if needed
+          _isDeactivate = false;
+          _start();
+        }
+      },
+      key: _visibilityKey,
     );
   }
 
   void _processImage(CameraImage cameraImage) async {
-    if (!_alreadyCheckingImage) {
+    if (!_alreadyCheckingImage && mounted) {
       _alreadyCheckingImage = true;
       try {
-        final T results = await _detect<T>(cameraImage, widget.detector, _rotation);
+        final T results =
+            await _detect<T>(cameraImage, widget.detector, _rotation);
         widget.onResult(results);
       } catch (ex, stack) {
         debugPrint('$ex, $stack');
