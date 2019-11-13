@@ -9,14 +9,14 @@ A Flutter package for iOS and Android to show a preview of the camera and detect
 
 ## Installation
 
-First, add `flutter_camera_ml_vision as a dependency.
+First, add `flutter_camera_ml_vision` as a dependency.
 
 ```yaml
 ...
 dependencies:
   flutter:
     sdk: flutter
-  flutter_camera_ml_vision: ^1.0.0
+  flutter_camera_ml_vision: ^2.2.4
 ...
 ```
 
@@ -65,7 +65,7 @@ android {
     dependencies {
         // ...
 
-        api 'com.google.firebase:firebase-ml-vision-image-label-model:17.0.2'
+        api 'com.google.firebase:firebase-ml-vision-image-label-model:19.0.0'
     }
 }
 ```
