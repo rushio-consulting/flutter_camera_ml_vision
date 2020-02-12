@@ -112,7 +112,7 @@ DEPENDENCIES:
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  https://github.com/CocoaPods/Specs.git:
     - Firebase
     - FirebaseAnalytics
     - FirebaseCore
@@ -145,7 +145,7 @@ SPEC CHECKSUMS:
   camera: 38cc83ae9a5667bb5a71c7d9edaf60a91920fd4e
   device_info: cbf09d2ec12aa7110e0b09fabe54b5bd6c8efe74
   Firebase: fa80b9d987ca014a1ba9357496ef2a0178b28b12
-  firebase_ml_vision: d09b1eb3c242cf8124db4d51c0927376e3dbd9f4
+  firebase_ml_vision: a40524ef47717f380239e19567c9dc050d8cc1de
   FirebaseAnalytics: 1743c5f4de3687d0745709dfdc4b1dea1484f44c
   FirebaseCore: e38f025287b413255a53acc1945d048a112047f7
   FirebaseInstanceID: 0e0348a3c00a734fa376a070f5ad4533ad975cb5
@@ -165,4 +165,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 389c8036e38c7090e87c697e550157f4e57648d9
 
-COCOAPODS: 1.6.0
+COCOAPODS: 1.8.4

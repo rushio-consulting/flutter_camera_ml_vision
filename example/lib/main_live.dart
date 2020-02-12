@@ -43,6 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
           CameraMlVision<List<Barcode>>(
             key: _scanKey,
             detector: detector.detectInImage,
+            resolution: ResolutionPreset.high,
             onResult: (barcodes) {
               if (barcodes == null ||
                   barcodes.isEmpty ||
