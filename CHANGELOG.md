@@ -1,3 +1,10 @@
+## [2.2.5] - 12/02/2020
+
+- fix crash on android app lifecycle
+- expose camera controller
+- pass default resolution to high to improve reading of barcode
+- update deps
+
 ## [2.2.4] - 04/11/2019
 
 - simplify pause stream when not on screen by using VisibilityDetector widget

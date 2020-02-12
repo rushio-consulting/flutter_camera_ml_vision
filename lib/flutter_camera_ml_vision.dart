@@ -14,6 +14,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 import 'package:path_provider/path_provider.dart';
 
+export 'package:camera/camera.dart';
+
 part 'utils.dart';
 
 typedef HandleDetection<T> = Future<T> Function(FirebaseVisionImage image);
@@ -31,6 +33,7 @@ enum _CameraState {
   error,
   ready,
 }
+
 
 class CameraMlVision<T> extends StatefulWidget {
   final HandleDetection<T> detector;
@@ -58,7 +61,7 @@ class CameraMlVision<T> extends StatefulWidget {
   CameraMlVisionState createState() => CameraMlVisionState<T>();
 }
 
-class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
+class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindingObserver {
   String _lastImage;
   Key _visibilityKey = UniqueKey();
   CameraController _cameraController;
@@ -72,7 +75,29 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initialize();
+  }
+
+  @override
+  void didUpdateWidget(CameraMlVision<T> oldWidget) {
+    if (oldWidget.resolution != widget.resolution) {
+      _initialize();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // App state changed before we got the chance to initialize.
+    if (_cameraController == null || !_cameraController.value.isInitialized) {
+      return;
+    }
+    if (state == AppLifecycleState.inactive) {
+      _cameraController?.dispose();
+    } else if (state == AppLifecycleState.resumed && _isStreaming) {
+      _initialize();
+    }
   }
 
   Future<void> stop() async {
@@ -84,6 +109,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
       Directory tempDir = await getTemporaryDirectory();
       _lastImage = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}';
       try {
+        await _cameraController.initialize();
         await _cameraController.takePicture(_lastImage);
       } on PlatformException catch (e) {
         debugPrint('$e');
@@ -94,19 +120,19 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
   }
 
   void _stop(bool silently) {
-    Future.microtask(() async {
+    scheduleMicrotask(() async {
       if (_cameraController?.value?.isStreamingImages == true && mounted) {
-        await _cameraController.stopImageStream();
+        await _cameraController.stopImageStream().catchError((_) {});
+      }
+
+      if (silently) {
+        _isStreaming = false;
+      } else {
+        setState(() {
+          _isStreaming = false;
+        });
       }
     });
-
-    if (silently) {
-      _isStreaming = false;
-    } else {
-      setState(() {
-        _isStreaming = false;
-      });
-    }
   }
 
   void start() {
@@ -138,6 +164,8 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
     await _cameraController.startImageStream(_processImage);
   }
 
+  CameraController get cameraController => _cameraController;
+
   Future<void> Function(String path) get takePicture =>
       _cameraController.takePicture;
 
@@ -165,11 +193,12 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
 
       return;
     }
+    await _cameraController?.dispose();
     _cameraController = CameraController(
       description,
       widget.resolution ??
           ResolutionPreset
-              .low, // As the doc says, better to set low when streaming images to avoid drop frames on older devices
+              .high,
       enableAudio: false,
     );
     if (!mounted) {
