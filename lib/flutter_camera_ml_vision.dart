@@ -275,7 +275,16 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
       cameraPreview = Stack(
         fit: StackFit.passthrough,
         children: [
-          cameraPreview,
+          Transform.scale(
+          scale: _cameraController.value.aspectRatio / deviceRatio,
+          child: Center(
+            child: AspectRatio(
+              aspectRatio: _cameraController.value.aspectRatio,
+              child: cameraPreview,
+                ),
+              ),
+            )
+          ,
           widget.overlayBuilder(context),
         ],
       );
