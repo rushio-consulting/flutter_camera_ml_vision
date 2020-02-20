@@ -272,26 +272,29 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
           : _getPicture(),
     );
     
-    if (widget.overlayBuilder != null) {
-      final size = MediaQuery.of(context).size;
-      final deviceRatio = size.width / size.height;
-      cameraPreview = Stack(
-        fit: StackFit.passthrough,
-        children: [
-          Transform.scale(
+    final size = MediaQuery.of(context).size;
+    final deviceRatio = size.width / size.height;
+
+    cameraPreview = Transform.scale(
           scale: _cameraController.value.aspectRatio / deviceRatio,
           child: Center(
             child: AspectRatio(
               aspectRatio: _cameraController.value.aspectRatio,
               child: cameraPreview,
-                ),
-              ),
-            )
-          ,
+        ),
+      ),
+    );
+
+    if (widget.overlayBuilder != null) {
+      cameraPreview = Stack(
+        fit: StackFit.passthrough,
+        children: [
+          cameraPreview,
           widget.overlayBuilder(context),
         ],
       );
     }
+    
     return VisibilityDetector(
       child: FittedBox(
         alignment: Alignment.center,
