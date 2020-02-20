@@ -271,7 +271,10 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
             )
           : _getPicture(),
     );
+    
     if (widget.overlayBuilder != null) {
+      final size = MediaQuery.of(context).size;
+      final deviceRatio = size.width / size.height;
       cameraPreview = Stack(
         fit: StackFit.passthrough,
         children: [
