@@ -115,7 +115,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
         debugPrint('$e');
       }
 
-      _stop(false);
+      await _stop(false);
     }
   }
 
