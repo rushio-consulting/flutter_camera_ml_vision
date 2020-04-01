@@ -172,7 +172,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
   Future<void> takePicture(String path) async {
     await _stop(false);
     await _cameraController.takePicture(path);
-    await _start();
+    _start();
   }
 
   Future<void> _initialize() async {
