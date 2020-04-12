@@ -1,6 +1,7 @@
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_camera_ml_vision/flutter_camera_ml_vision.dart';
+import 'package:native_device_orientation/native_device_orientation.dart';
 
 void main() => runApp(MyApp());
 
@@ -40,25 +41,48 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          CameraMlVision<List<Barcode>>(
-            key: _scanKey,
-            detector: detector.detectInImage,
-            resolution: ResolutionPreset.high,
-            onResult: (barcodes) {
-              if (barcodes == null ||
-                  barcodes.isEmpty ||
-                  data.contains(barcodes.first.displayValue) ||
-                  !mounted) {
-                return;
-              }
-              setState(() {
-                data.add(barcodes.first.displayValue);
-              });
-            },
-            onDispose: () {
-              detector.close();
-            },
-          ),
+          NativeDeviceOrientationReader(builder: (context) {
+            NativeDeviceOrientation orientation =
+                NativeDeviceOrientationReader.orientation(context);
+
+            int turns;
+            switch (orientation) {
+              case NativeDeviceOrientation.landscapeLeft:
+                turns = -1;
+                break;
+              case NativeDeviceOrientation.landscapeRight:
+                turns = 1;
+                break;
+              case NativeDeviceOrientation.portraitDown:
+                turns = 2;
+                break;
+              default:
+                turns = 0;
+                break;
+            }
+
+            return RotatedBox(
+                quarterTurns: turns,
+                child: CameraMlVision<List<Barcode>>(
+                  key: _scanKey,
+                  detector: detector.detectInImage,
+                  resolution: ResolutionPreset.high,
+                  onResult: (barcodes) {
+                    if (barcodes == null ||
+                        barcodes.isEmpty ||
+                        data.contains(barcodes.first.displayValue) ||
+                        !mounted) {
+                      return;
+                    }
+                    setState(() {
+                      data.add(barcodes.first.displayValue);
+                    });
+                  },
+                  onDispose: () {
+                    detector.close();
+                  },
+                ));
+          }),
           Container(
             alignment: Alignment.bottomCenter,
             child: Column(
