@@ -269,13 +269,14 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
     }
 
     Widget cameraPreview = AspectRatio(
-      aspectRatio: _cameraController.value.aspectRatio,
+      aspectRatio: _cameraController.value.isInitialized ? _cameraController.value.aspectRatio : 1,
       child: _isStreaming
           ? CameraPreview(
-              _cameraController,
-            )
+        _cameraController,
+      )
           : _getPicture(),
     );
+
     if (widget.overlayBuilder != null) {
       cameraPreview = Stack(
         fit: StackFit.passthrough,
