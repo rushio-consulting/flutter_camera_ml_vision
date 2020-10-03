@@ -1,3 +1,8 @@
+## [2.3.0] - 03/10/2020
+
+- fix NPE on aspect ratio
+- update deps
+
 ## [2.2.5] - 12/02/2020
 
 - fix crash on android app lifecycle
