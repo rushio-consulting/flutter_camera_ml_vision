@@ -16,7 +16,7 @@ dependencies:
 
   firebase_ml_vision: ^0.9.7
   flutter_widgets: ^0.1.12
-  path_provider: ^1.6.18
+  path_provider: ^1.6.24
   pedantic: ^1.9.0
   device_info: ^1.0.0
   camera: ^0.5.8+7
