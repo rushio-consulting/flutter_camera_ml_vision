@@ -14,12 +14,19 @@ dependencies:
   flutter:
     sdk: flutter
 
-  firebase_ml_vision: ^0.9.7
+  firebase_ml_vision: ^0.10.0
   flutter_widgets: ^0.1.12
+<<<<<<< Updated upstream
   path_provider: ^1.6.18
   pedantic: ^1.9.0
   device_info: ^0.4.2+8
   camera: ^0.5.8+7
+=======
+  path_provider: ^1.6.27
+  pedantic: ^1.9.2
+  device_info: ^1.0.0
+  camera: ^0.6.4+5
+>>>>>>> Stashed changes
 
 dev_dependencies:
   flutter_test:
