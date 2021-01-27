@@ -11,7 +11,6 @@ import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 export 'package:camera/camera.dart';
@@ -288,14 +287,10 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
       );
     }
     return VisibilityDetector(
-      child: FittedBox(
-        alignment: Alignment.center,
-        fit: BoxFit.cover,
-        child: SizedBox(
-          width: _cameraController.value.previewSize.height * _cameraController.value.aspectRatio,
-          height: _cameraController.value.previewSize.height,
-          child: cameraPreview,
-        ),
+      child: SizedBox(
+        width: _cameraController.value.previewSize.width,
+        height: _cameraController.value.previewSize.height,
+        child: cameraPreview,
       ),
       onVisibilityChanged: (VisibilityInfo info) {
         if (info.visibleFraction == 0) {

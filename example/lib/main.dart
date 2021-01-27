@@ -84,34 +84,28 @@ class _ScanPageState extends State<ScanPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          child: CameraMlVision<List<Barcode>>(
-            overlayBuilder: (c) {
-              return Container(
-                decoration: ShapeDecoration(
-                  shape: _ScannerOverlayShape(
-                    borderColor: Theme.of(context).primaryColor,
-                    borderWidth: 3.0,
-                  ),
+        child: CameraMlVision<List<Barcode>>(
+          overlayBuilder: (c) {
+            return Container(
+              decoration: ShapeDecoration(
+                shape: _ScannerOverlayShape(
+                  borderColor: Theme.of(context).primaryColor,
+                  borderWidth: 3.0,
                 ),
-              );
-            },
-            detector: detector.detectInImage,
-            onResult: (List<Barcode> barcodes) {
-              if (!mounted ||
-                  resultSent ||
-                  barcodes == null ||
-                  barcodes.isEmpty) {
-                return;
-              }
-              resultSent = true;
-              Navigator.of(context).pop<Barcode>(barcodes.first);
-            },
-            onDispose: () {
-              detector.close();
-            },
-          ),
+              ),
+            );
+          },
+          detector: detector.detectInImage,
+          onResult: (List<Barcode> barcodes) {
+            if (!mounted || resultSent || barcodes == null || barcodes.isEmpty) {
+              return;
+            }
+            resultSent = true;
+            Navigator.of(context).pop<Barcode>(barcodes.first);
+          },
+          onDispose: () {
+            detector.close();
+          },
         ),
       ),
     );
@@ -179,26 +173,21 @@ class _ScannerOverlayShape extends ShapeBorder {
 
     canvas
       ..drawRect(
-        Rect.fromLTRB(
-            rect.left, rect.top, rect.right, borderSize.height + rect.top),
+        Rect.fromLTRB(rect.left, rect.top, rect.right, borderSize.height + rect.top),
         paint,
       )
       ..drawRect(
-        Rect.fromLTRB(rect.left, rect.bottom - borderSize.height, rect.right,
-            rect.bottom),
-        paint,
-      )
-      ..drawRect(
-        Rect.fromLTRB(rect.left, rect.top + borderSize.height,
-            rect.left + borderSize.width, rect.bottom - borderSize.height),
+        Rect.fromLTRB(rect.left, rect.bottom - borderSize.height, rect.right, rect.bottom),
         paint,
       )
       ..drawRect(
         Rect.fromLTRB(
-            rect.right - borderSize.width,
-            rect.top + borderSize.height,
-            rect.right,
-            rect.bottom - borderSize.height),
+            rect.left, rect.top + borderSize.height, rect.left + borderSize.width, rect.bottom - borderSize.height),
+        paint,
+      )
+      ..drawRect(
+        Rect.fromLTRB(
+            rect.right - borderSize.width, rect.top + borderSize.height, rect.right, rect.bottom - borderSize.height),
         paint,
       );
 
@@ -208,11 +197,8 @@ class _ScannerOverlayShape extends ShapeBorder {
       ..strokeWidth = borderWidth;
 
     final borderOffset = borderWidth / 2;
-    final realReact = Rect.fromLTRB(
-        borderSize.width + borderOffset,
-        borderSize.height + borderOffset + rect.top,
-        width - borderSize.width - borderOffset,
-        height - borderSize.height - borderOffset + rect.top);
+    final realReact = Rect.fromLTRB(borderSize.width + borderOffset, borderSize.height + borderOffset + rect.top,
+        width - borderSize.width - borderOffset, height - borderSize.height - borderOffset + rect.top);
 
     //Draw top right corner
     canvas
