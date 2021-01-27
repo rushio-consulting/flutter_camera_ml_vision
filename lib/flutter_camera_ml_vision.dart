@@ -61,7 +61,7 @@ class CameraMlVision<T> extends StatefulWidget {
 }
 
 class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindingObserver {
-  String _lastImage;
+  // String _lastImage;
   final _visibilityKey = UniqueKey();
   CameraController _cameraController;
   ImageRotation _rotation;
@@ -70,7 +70,8 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
   bool _alreadyCheckingImage = false;
   bool _isStreaming = false;
   bool _isDeactivate = false;
-  XFile _lastFrame;
+  XFile _lastFrameFile;
+  List<int> _lastFrameBytes;
 
   @override
   void initState() {
@@ -102,15 +103,15 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
 
   Future<void> stop() async {
     if (_cameraController != null) {
-      if (_lastImage != null && File(_lastImage).existsSync()) {
-        await File(_lastImage).delete();
+      if (_lastFrameFile != null) {
+        _lastFrameFile = null;
+        _lastFrameBytes = null;
       }
 
-      var tempDir = await getTemporaryDirectory();
-      _lastImage = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}';
       try {
         await _cameraController.initialize();
-        _lastFrame = await _cameraController.takePicture();
+        _lastFrameFile = await _cameraController.takePicture();
+        _lastFrameBytes = await _lastFrameFile.readAsBytes();
       } on PlatformException catch (e) {
         debugPrint('$e');
       }
@@ -244,8 +245,9 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
     if (widget.onDispose != null) {
       widget.onDispose();
     }
-    if (_lastImage != null && File(_lastImage).existsSync()) {
-      File(_lastImage).delete();
+    if (_lastFrameFile != null) {
+      _lastFrameFile = null;
+      _lastFrameBytes = null;
     }
     if (_cameraController != null) {
       _cameraController.dispose();
@@ -332,11 +334,8 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
   }
 
   Widget _getPicture() {
-    if (_lastImage != null) {
-      final file = File(_lastImage);
-      if (file.existsSync()) {
-        return Image.file(file);
-      }
+    if (_lastFrameFile != null && _lastFrameBytes != null) {
+      return Image.memory(_lastFrameBytes);
     }
 
     return Container();
