@@ -11,15 +11,15 @@ import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_widgets/flutter_widgets.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 export 'package:camera/camera.dart';
 
 part 'utils.dart';
 
 typedef HandleDetection<T> = Future<T> Function(FirebaseVisionImage image);
-typedef Widget ErrorWidgetBuilder(BuildContext context, CameraError error);
+typedef ErrorWidgetBuilder = Widget Function(BuildContext context, CameraError error);
 
 enum CameraError {
   unknown,
@@ -36,7 +36,7 @@ enum _CameraState {
 
 class CameraMlVision<T> extends StatefulWidget {
   final HandleDetection<T> detector;
-  final Function(T) onResult;
+  final FutureOr<void> Function(T) onResult;
   final WidgetBuilder loadingBuilder;
   final ErrorWidgetBuilder errorBuilder;
   final WidgetBuilder overlayBuilder;
@@ -60,10 +60,9 @@ class CameraMlVision<T> extends StatefulWidget {
   CameraMlVisionState createState() => CameraMlVisionState<T>();
 }
 
-class CameraMlVisionState<T> extends State<CameraMlVision<T>>
-    with WidgetsBindingObserver {
+class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindingObserver {
   String _lastImage;
-  Key _visibilityKey = UniqueKey();
+  final _visibilityKey = UniqueKey();
   CameraController _cameraController;
   ImageRotation _rotation;
   _CameraState _cameraMlVisionState = _CameraState.loading;
@@ -71,6 +70,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
   bool _alreadyCheckingImage = false;
   bool _isStreaming = false;
   bool _isDeactivate = false;
+  XFile _lastFrame;
 
   @override
   void initState() {
@@ -106,11 +106,11 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
         await File(_lastImage).delete();
       }
 
-      Directory tempDir = await getTemporaryDirectory();
+      var tempDir = await getTemporaryDirectory();
       _lastImage = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}';
       try {
         await _cameraController.initialize();
-        await _cameraController.takePicture(_lastImage);
+        _lastFrame = await _cameraController.takePicture();
       } on PlatformException catch (e) {
         debugPrint('$e');
       }
@@ -154,12 +154,11 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
   CameraValue get cameraValue => _cameraController?.value;
   ImageRotation get imageRotation => _rotation;
 
-  Future<void> Function() get prepareForVideoRecording =>
-      _cameraController.prepareForVideoRecording;
+  Future<void> Function() get prepareForVideoRecording => _cameraController.prepareForVideoRecording;
 
-  Future<void> startVideoRecording(String path) async {
+  Future<void> startVideoRecording() async {
     await _cameraController.stopImageStream();
-    return _cameraController.startVideoRecording(path);
+    await _cameraController.startVideoRecording();
   }
 
   Future<void> stopVideoRecording() async {
@@ -169,11 +168,12 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
 
   CameraController get cameraController => _cameraController;
 
-  Future<void> takePicture(String path) async {
+  Future<XFile> takePicture() async {
     await _stop(false);
     await _cameraController.initialize();
-    await _cameraController.takePicture(path);
+    final file = await _cameraController.takePicture();
     _start();
+    return file;
   }
 
   Future<void> _initialize() async {
@@ -192,8 +192,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
       }
     }
 
-    CameraDescription description =
-        await _getCamera(widget.cameraLensDirection);
+    var description = await _getCamera(widget.cameraLensDirection);
     if (description == null) {
       _cameraMlVisionState = _CameraState.error;
       _cameraError = CameraError.noCameraAvailable;
@@ -272,8 +271,8 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
       aspectRatio: _cameraController.value.isInitialized ? _cameraController.value.aspectRatio : 1,
       child: _isStreaming
           ? CameraPreview(
-        _cameraController,
-      )
+              _cameraController,
+            )
           : _getPicture(),
     );
 
@@ -291,8 +290,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
         alignment: Alignment.center,
         fit: BoxFit.cover,
         child: SizedBox(
-          width: _cameraController.value.previewSize.height *
-              _cameraController.value.aspectRatio,
+          width: _cameraController.value.previewSize.height * _cameraController.value.aspectRatio,
           height: _cameraController.value.previewSize.height,
           child: cameraPreview,
         ),
@@ -316,8 +314,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
     if (!_alreadyCheckingImage && mounted) {
       _alreadyCheckingImage = true;
       try {
-        final T results =
-            await _detect<T>(cameraImage, widget.detector, _rotation);
+        final results = await _detect<T>(cameraImage, widget.detector, _rotation);
         widget.onResult(results);
       } catch (ex, stack) {
         debugPrint('$ex, $stack');
