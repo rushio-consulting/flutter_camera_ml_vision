@@ -175,6 +175,34 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
     return file;
   }
 
+  Future<void> flash(FlashMode mode) async {
+    await _cameraController.setFlashMode(mode);
+  }
+
+  Future<void> focus(FocusMode mode) async {
+    await _cameraController.setFocusMode(mode);
+  }
+
+  Future<void> focusPoint(Offset point) async {
+    await _cameraController.setFocusPoint(point);
+  }
+
+  Future<void> zoom(double zoom) async {
+    await _cameraController.setZoomLevel(zoom);
+  }
+
+  Future<void> exposure(ExposureMode mode) async {
+    await _cameraController.setExposureMode(mode);
+  }
+
+  Future<void> exposureOffset(double offset) async {
+    await _cameraController.setExposureOffset(offset);
+  }
+
+  Future<void> exposurePoint(Offset offset) async {
+    await _cameraController.setExposurePoint(offset);
+  }
+
   Future<void> _initialize() async {
     if (Platform.isAndroid) {
       final deviceInfo = DeviceInfoPlugin();

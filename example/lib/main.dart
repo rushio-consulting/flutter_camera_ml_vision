@@ -78,7 +78,8 @@ class ScanPage extends StatefulWidget {
 
 class _ScanPageState extends State<ScanPage> {
   bool resultSent = false;
-  BarcodeDetector detector = FirebaseVision.instance.barcodeDetector();
+  BarcodeDetector detector =
+      FirebaseVision.instance.barcodeDetector(BarcodeDetectorOptions(barcodeFormats: BarcodeFormat.aztec));
 
   @override
   Widget build(BuildContext context) {
