@@ -18,4 +18,4 @@ google-services.json
 /example/ios/Runner/GoogleService-Info.plist
 example/ios/Flutter/flutter_export_environment.sh
 
-.fvm
+.fvm/
