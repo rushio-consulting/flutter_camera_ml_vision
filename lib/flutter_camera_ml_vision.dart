@@ -69,7 +69,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
   bool _alreadyCheckingImage = false;
   bool _isStreaming = false;
   bool _isDeactivate = false;
-  XFile _lastFrameFile;
+  // XFile _lastFrameFile;
   List<int> _lastFrameBytes;
 
   @override
@@ -102,14 +102,13 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
 
   Future<void> stop() async {
     if (_cameraController != null) {
-      if (_lastFrameFile != null) {
-        _lastFrameFile = null;
+      if (_lastFrameBytes != null) {
         _lastFrameBytes = null;
       }
 
       try {
         await _cameraController.initialize();
-        _lastFrameFile = await _cameraController.takePicture();
+        final _lastFrameFile = await _cameraController.takePicture();
         _lastFrameBytes = await _lastFrameFile.readAsBytes();
       } on PlatformException catch (e) {
         debugPrint('$e');
@@ -244,8 +243,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
     if (widget.onDispose != null) {
       widget.onDispose();
     }
-    if (_lastFrameFile != null) {
-      _lastFrameFile = null;
+    if (_lastFrameBytes != null) {
       _lastFrameBytes = null;
     }
     if (_cameraController != null) {
@@ -329,7 +327,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
   }
 
   Widget _getPicture() {
-    if (_lastFrameFile != null && _lastFrameBytes != null) {
+    if (_lastFrameBytes != null) {
       return Image.memory(_lastFrameBytes);
     }
 
