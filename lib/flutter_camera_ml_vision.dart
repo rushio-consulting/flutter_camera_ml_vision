@@ -266,30 +266,29 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
           : widget.errorBuilder(context, _cameraError);
     }
 
-    Widget cameraPreview = AspectRatio(
-      aspectRatio: _cameraController.value.isInitialized ? _cameraController.value.aspectRatio : 1,
-      child: _isStreaming
-          ? CameraPreview(
-              _cameraController,
-            )
-          : _getPicture(),
-    );
+    var cameraPreview = _isStreaming
+        ? CameraPreview(
+            _cameraController,
+          )
+        : _getPicture();
 
     if (widget.overlayBuilder != null) {
       cameraPreview = Stack(
         fit: StackFit.passthrough,
         children: [
           cameraPreview,
-          widget.overlayBuilder(context),
+          cameraController.value.isInitialized
+              ? AspectRatio(
+                  aspectRatio:
+                      _isLandscape() ? cameraController.value.aspectRatio : (1 / cameraController.value.aspectRatio),
+                  child: widget.overlayBuilder(context),
+                )
+              : Container(),
         ],
       );
     }
     return VisibilityDetector(
-      child: SizedBox(
-        width: _cameraController.value.previewSize.width,
-        height: _cameraController.value.previewSize.height,
-        child: cameraPreview,
-      ),
+      child: cameraPreview,
       onVisibilityChanged: (VisibilityInfo info) {
         if (info.visibleFraction == 0) {
           //invisible stop the streaming
@@ -332,5 +331,15 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
     }
 
     return Container();
+  }
+
+  DeviceOrientation _getApplicableOrientation() {
+    return cameraController.value.isRecordingVideo
+        ? cameraController.value.recordingOrientation
+        : (cameraController.value.lockedCaptureOrientation ?? cameraController.value.deviceOrientation);
+  }
+
+  bool _isLandscape() {
+    return [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight].contains(_getApplicableOrientation());
   }
 }
