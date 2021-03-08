@@ -316,7 +316,6 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
       );
     }
     return VisibilityDetector(
-      child: cameraPreview,
       onVisibilityChanged: (VisibilityInfo info) {
         if (info.visibleFraction == 0) {
           //invisible stop the streaming
@@ -329,6 +328,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
         }
       },
       key: _visibilityKey,
+      child: cameraPreview,
     );
   }
 
