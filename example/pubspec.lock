@@ -50,13 +50,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.15.0"
-  csslib:
-    dependency: transitive
-    description:
-      name: csslib
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.16.1"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -123,20 +116,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_widgets:
-    dependency: transitive
-    description:
-      name: flutter_widgets
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.12"
-  html:
-    dependency: transitive
-    description:
-      name: html
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.14.0+3"
   intl:
     dependency: transitive
     description:
@@ -228,13 +207,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.13"
-  quiver:
-    dependency: transitive
-    description:
-      name: quiver
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.5"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -296,6 +268,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0"
+  visibility_detector:
+    dependency: transitive
+    description:
+      name: visibility_detector
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.5"
   win32:
     dependency: transitive
     description:
@@ -312,4 +291,4 @@ packages:
     version: "0.1.0"
 sdks:
   dart: ">=2.12.0-0.0 <3.0.0"
-  flutter: ">=1.12.13+hotfix.5"
+  flutter: ">=1.13.8"

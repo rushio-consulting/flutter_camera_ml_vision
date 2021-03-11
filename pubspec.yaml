@@ -15,7 +15,7 @@ dependencies:
     sdk: flutter
 
   firebase_ml_vision: ^0.10.0
-  flutter_widgets: ^0.1.12
+  visibility_detector: ^0.1.5
   path_provider: ^1.6.18
   pedantic: ^1.10.0-nullsafety.3
   device_info: ^1.0.0
