@@ -11,7 +11,7 @@ import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_widgets/flutter_widgets.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 import 'package:path_provider/path_provider.dart';
 
 export 'package:camera/camera.dart';
@@ -60,8 +60,7 @@ class CameraMlVision<T> extends StatefulWidget {
   CameraMlVisionState createState() => CameraMlVisionState<T>();
 }
 
-class CameraMlVisionState<T> extends State<CameraMlVision<T>>
-    with WidgetsBindingObserver {
+class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindingObserver {
   String _lastImage;
   Key _visibilityKey = UniqueKey();
   CameraController _cameraController;
@@ -154,8 +153,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
   CameraValue get cameraValue => _cameraController?.value;
   ImageRotation get imageRotation => _rotation;
 
-  Future<void> Function() get prepareForVideoRecording =>
-      _cameraController.prepareForVideoRecording;
+  Future<void> Function() get prepareForVideoRecording => _cameraController.prepareForVideoRecording;
 
   Future<void> startVideoRecording(String path) async {
     await _cameraController.stopImageStream();
@@ -192,8 +190,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
       }
     }
 
-    CameraDescription description =
-        await _getCamera(widget.cameraLensDirection);
+    CameraDescription description = await _getCamera(widget.cameraLensDirection);
     if (description == null) {
       _cameraMlVisionState = _CameraState.error;
       _cameraError = CameraError.noCameraAvailable;
@@ -272,8 +269,8 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
       aspectRatio: _cameraController.value.isInitialized ? _cameraController.value.aspectRatio : 1,
       child: _isStreaming
           ? CameraPreview(
-        _cameraController,
-      )
+              _cameraController,
+            )
           : _getPicture(),
     );
 
@@ -291,8 +288,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
         alignment: Alignment.center,
         fit: BoxFit.cover,
         child: SizedBox(
-          width: _cameraController.value.previewSize.height *
-              _cameraController.value.aspectRatio,
+          width: _cameraController.value.previewSize.height * _cameraController.value.aspectRatio,
           height: _cameraController.value.previewSize.height,
           child: cameraPreview,
         ),
@@ -316,8 +312,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
     if (!_alreadyCheckingImage && mounted) {
       _alreadyCheckingImage = true;
       try {
-        final T results =
-            await _detect<T>(cameraImage, widget.detector, _rotation);
+        final T results = await _detect<T>(cameraImage, widget.detector, _rotation);
         widget.onResult(results);
       } catch (ex, stack) {
         debugPrint('$ex, $stack');
