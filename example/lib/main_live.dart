@@ -45,10 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
             detector: detector.detectInImage,
             resolution: ResolutionPreset.high,
             onResult: (barcodes) {
-              if (barcodes == null ||
-                  barcodes.isEmpty ||
-                  data.contains(barcodes.first.displayValue) ||
-                  !mounted) {
+              if (barcodes == null || barcodes.isEmpty || data.contains(barcodes.first.displayValue) || !mounted) {
                 return;
               }
               setState(() {
@@ -83,16 +80,15 @@ class _MyHomePageState extends State<MyHomePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
-                    RaisedButton(
+                    ElevatedButton(
                       onPressed: () {
                         _scanKey.currentState.toggle();
                       },
                       child: Text('Start/Pause camera'),
                     ),
-                    RaisedButton(
+                    ElevatedButton(
                       onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => _SecondScreen()));
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => _SecondScreen()));
                       },
                       child: Text('Push new route'),
                     ),
@@ -112,7 +108,7 @@ class _SecondScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: RaisedButton(
+      body: ElevatedButton(
         onPressed: () {
           Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => _SecondScreen(),

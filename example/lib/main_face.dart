@@ -31,8 +31,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Face> _faces = [];
   final _scanKey = GlobalKey<CameraMlVisionState>();
   CameraLensDirection cameraLensDirection = CameraLensDirection.front;
-  FaceDetector detector =
-      FirebaseVision.instance.faceDetector(FaceDetectorOptions(
+  FaceDetector detector = FirebaseVision.instance.faceDetector(FaceDetectorOptions(
     enableTracking: true,
     mode: FaceDetectorMode.accurate,
   ));
@@ -50,8 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
           detector: detector.processImage,
           overlayBuilder: (c) {
             return CustomPaint(
-              painter: FaceDetectorPainter(
-                  _scanKey.currentState.cameraValue.previewSize.flipped, _faces,
+              painter: FaceDetectorPainter(_scanKey.currentState.cameraValue.previewSize.flipped, _faces,
                   reflection: cameraLensDirection == CameraLensDirection.front),
             );
           },
@@ -60,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
               return;
             }
             setState(() {
-              _faces = []..addAll(faces);
+              _faces = [...faces];
             });
           },
           onDispose: () {
@@ -81,14 +79,13 @@ class FaceDetectorPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
+    final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0
       ..color = Colors.red;
 
-    for (Face face in faces) {
-      final faceRect =
-          _reflectionRect(reflection, face.boundingBox, imageSize.width);
+    for (var face in faces) {
+      final faceRect = _reflectionRect(reflection, face.boundingBox, imageSize.width);
       canvas.drawRect(
         _scaleRect(
           rect: faceRect,

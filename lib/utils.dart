@@ -10,7 +10,7 @@ Future<CameraDescription> _getCamera(CameraLensDirection dir) async {
 }
 
 Uint8List _concatenatePlanes(List<Plane> planes) {
-  final WriteBuffer allBytes = WriteBuffer();
+  final allBytes = WriteBuffer();
   planes.forEach((plane) => allBytes.putUint8List(plane.bytes));
   return allBytes.done().buffer.asUint8List();
 }

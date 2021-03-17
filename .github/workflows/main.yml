@@ -1,10 +1,9 @@
 name: CI
 
-on: 
+on:
   pull_request:
     branches:
-    - master
-    
+      - master
 
 jobs:
   analyze:
@@ -13,9 +12,14 @@ jobs:
       image: cirrusci/flutter:stable
 
     steps:
-    - uses: actions/checkout@v1
-    - run: sudo chown -R cirrus:cirrus ./ /github/home/
-    - name: Flutter pub get
-      run: flutter packages get
-    - name: Flutter analyze --suppress-analytics
-      run: flutter analyze --suppress-analytics
+      - uses: actions/checkout@v2
+
+      - uses: subosito/flutter-action@v1.4.0
+        with:
+          channel: stable
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Flutter analyze --suppress-analytics
+        run: flutter analyze --suppress-analytics
