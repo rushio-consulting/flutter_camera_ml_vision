@@ -34,7 +34,6 @@ enum _CameraState {
   ready,
 }
 
-
 class CameraMlVision<T> extends StatefulWidget {
   final HandleDetection<T> detector;
   final Function(T) onResult;
@@ -61,7 +60,8 @@ class CameraMlVision<T> extends StatefulWidget {
   CameraMlVisionState createState() => CameraMlVisionState<T>();
 }
 
-class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindingObserver {
+class CameraMlVisionState<T> extends State<CameraMlVision<T>>
+    with WidgetsBindingObserver {
   String _lastImage;
   Key _visibilityKey = UniqueKey();
   CameraController _cameraController;
@@ -115,11 +115,12 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
         debugPrint('$e');
       }
 
-      _stop(false);
+      await _stop(false);
     }
   }
 
-  void _stop(bool silently) {
+  Future<void> _stop(bool silently) {
+    final completer = Completer();
     scheduleMicrotask(() async {
       if (_cameraController?.value?.isStreamingImages == true && mounted) {
         await _cameraController.stopImageStream().catchError((_) {});
@@ -132,7 +133,9 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
           _isStreaming = false;
         });
       }
+      completer.complete();
     });
+    return completer.future;
   }
 
   void start() {
@@ -166,8 +169,12 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
 
   CameraController get cameraController => _cameraController;
 
-  Future<void> Function(String path) get takePicture =>
-      _cameraController.takePicture;
+  Future<void> takePicture(String path) async {
+    await _stop(false);
+    await _cameraController.initialize();
+    await _cameraController.takePicture(path);
+    _start();
+  }
 
   Future<void> _initialize() async {
     if (Platform.isAndroid) {
@@ -196,9 +203,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
     await _cameraController?.dispose();
     _cameraController = CameraController(
       description,
-      widget.resolution ??
-          ResolutionPreset
-              .high,
+      widget.resolution ?? ResolutionPreset.high,
       enableAudio: false,
     );
     if (!mounted) {
@@ -264,13 +269,14 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> with WidgetsBindin
     }
 
     Widget cameraPreview = AspectRatio(
-      aspectRatio: _cameraController.value.aspectRatio,
+      aspectRatio: _cameraController.value.isInitialized ? _cameraController.value.aspectRatio : 1,
       child: _isStreaming
           ? CameraPreview(
-              _cameraController,
-            )
+        _cameraController,
+      )
           : _getPicture(),
     );
+
     if (widget.overlayBuilder != null) {
       cameraPreview = Stack(
         fit: StackFit.passthrough,
