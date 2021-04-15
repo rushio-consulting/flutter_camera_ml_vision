@@ -156,20 +156,20 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
     return _cameraController.startVideoRecording();
   }
 
-  Future<void> stopVideoRecording(String path) async {
+  Future<XFile> stopVideoRecording(String path) async {
     final file = await _cameraController.stopVideoRecording();
-    await file.saveTo(path);
     await _cameraController.startImageStream(_processImage);
+    return file;
   }
 
   CameraController get cameraController => _cameraController;
 
-  Future<void> takePicture(String path) async {
+  Future<XFile> takePicture(String path) async {
     await _stop(false);
     await _cameraController.initialize();
     final image = await _cameraController.takePicture();
-    await image.saveTo(path);
     _start();
+    return image;
   }
 
   Future<void> _initialize() async {
