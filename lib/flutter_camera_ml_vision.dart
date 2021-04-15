@@ -11,7 +11,6 @@ import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 export 'package:camera/camera.dart';
@@ -19,7 +18,7 @@ export 'package:camera/camera.dart';
 part 'utils.dart';
 
 typedef HandleDetection<T> = Future<T> Function(FirebaseVisionImage image);
-typedef Widget ErrorWidgetBuilder(BuildContext context, CameraError error);
+typedef ErrorWidgetBuilder = Widget Function(BuildContext context, CameraError error);
 
 enum CameraError {
   unknown,
@@ -62,8 +61,8 @@ class CameraMlVision<T> extends StatefulWidget {
 
 class CameraMlVisionState<T> extends State<CameraMlVision<T>>
     with WidgetsBindingObserver {
-  String _lastImage;
-  Key _visibilityKey = UniqueKey();
+  XFile _lastImage;
+  final _visibilityKey = UniqueKey();
   CameraController _cameraController;
   ImageRotation _rotation;
   _CameraState _cameraMlVisionState = _CameraState.loading;
@@ -102,15 +101,9 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
 
   Future<void> stop() async {
     if (_cameraController != null) {
-      if (_lastImage != null && File(_lastImage).existsSync()) {
-        await File(_lastImage).delete();
-      }
-
-      Directory tempDir = await getTemporaryDirectory();
-      _lastImage = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}';
       try {
         await _cameraController.initialize();
-        await _cameraController.takePicture(_lastImage);
+        _lastImage = await _cameraController.takePicture();
       } on PlatformException catch (e) {
         debugPrint('$e');
       }
@@ -152,18 +145,20 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
   }
 
   CameraValue get cameraValue => _cameraController?.value;
+
   ImageRotation get imageRotation => _rotation;
 
   Future<void> Function() get prepareForVideoRecording =>
       _cameraController.prepareForVideoRecording;
 
-  Future<void> startVideoRecording(String path) async {
+  Future<void> startVideoRecording() async {
     await _cameraController.stopImageStream();
-    return _cameraController.startVideoRecording(path);
+    return _cameraController.startVideoRecording();
   }
 
-  Future<void> stopVideoRecording() async {
-    await _cameraController.stopVideoRecording();
+  Future<void> stopVideoRecording(String path) async {
+    final file = await _cameraController.stopVideoRecording();
+    await file.saveTo(path);
     await _cameraController.startImageStream(_processImage);
   }
 
@@ -172,7 +167,8 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
   Future<void> takePicture(String path) async {
     await _stop(false);
     await _cameraController.initialize();
-    await _cameraController.takePicture(path);
+    final image = await _cameraController.takePicture();
+    await image.saveTo(path);
     _start();
   }
 
@@ -192,8 +188,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
       }
     }
 
-    CameraDescription description =
-        await _getCamera(widget.cameraLensDirection);
+    final description = await _getCamera(widget.cameraLensDirection);
     if (description == null) {
       _cameraMlVisionState = _CameraState.error;
       _cameraError = CameraError.noCameraAvailable;
@@ -245,9 +240,6 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
     if (widget.onDispose != null) {
       widget.onDispose();
     }
-    if (_lastImage != null && File(_lastImage).existsSync()) {
-      File(_lastImage).delete();
-    }
     if (_cameraController != null) {
       _cameraController.dispose();
     }
@@ -269,7 +261,8 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
     }
 
     Widget cameraPreview = AspectRatio(
-      aspectRatio: _cameraController.value.isInitialized ? _cameraController.value.aspectRatio : 1,
+      aspectRatio: _cameraController.value.isInitialized ? _cameraController
+          .value.aspectRatio : 1,
       child: _isStreaming
           ? CameraPreview(
         _cameraController,
@@ -287,16 +280,6 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
       );
     }
     return VisibilityDetector(
-      child: FittedBox(
-        alignment: Alignment.center,
-        fit: BoxFit.cover,
-        child: SizedBox(
-          width: _cameraController.value.previewSize.height *
-              _cameraController.value.aspectRatio,
-          height: _cameraController.value.previewSize.height,
-          child: cameraPreview,
-        ),
-      ),
       onVisibilityChanged: (VisibilityInfo info) {
         if (info.visibleFraction == 0) {
           //invisible stop the streaming
@@ -309,6 +292,16 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
         }
       },
       key: _visibilityKey,
+      child: FittedBox(
+        alignment: Alignment.center,
+        fit: BoxFit.cover,
+        child: SizedBox(
+          width: _cameraController.value.previewSize.height *
+              _cameraController.value.aspectRatio,
+          height: _cameraController.value.previewSize.height,
+          child: cameraPreview,
+        ),
+      ),
     );
   }
 
@@ -316,8 +309,8 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
     if (!_alreadyCheckingImage && mounted) {
       _alreadyCheckingImage = true;
       try {
-        final T results =
-            await _detect<T>(cameraImage, widget.detector, _rotation);
+        final results =
+        await _detect<T>(cameraImage, widget.detector, _rotation);
         widget.onResult(results);
       } catch (ex, stack) {
         debugPrint('$ex, $stack');
@@ -336,12 +329,8 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
 
   Widget _getPicture() {
     if (_lastImage != null) {
-      final file = File(_lastImage);
-      if (file.existsSync()) {
-        return Image.file(file);
-      }
+      return Image.file(File(_lastImage.path));
     }
-
     return Container();
   }
 }

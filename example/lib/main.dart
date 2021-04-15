@@ -41,8 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          RaisedButton(
-            child: Text('Scan product'),
+          ElevatedButton(
             onPressed: () async {
               final barcode = await Navigator.of(context).push<Barcode>(
                 MaterialPageRoute(
@@ -59,6 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 data.add(barcode.displayValue);
               });
             },
+            child: Text('Scan product'),
           ),
           Expanded(
             child: ListView(

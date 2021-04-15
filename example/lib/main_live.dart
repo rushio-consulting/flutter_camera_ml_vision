@@ -83,13 +83,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
-                    RaisedButton(
+                    ElevatedButton(
                       onPressed: () {
                         _scanKey.currentState.toggle();
                       },
                       child: Text('Start/Pause camera'),
                     ),
-                    RaisedButton(
+                    ElevatedButton(
                       onPressed: () {
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => _SecondScreen()));
@@ -112,7 +112,7 @@ class _SecondScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: RaisedButton(
+      body: ElevatedButton(
         onPressed: () {
           Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => _SecondScreen(),
