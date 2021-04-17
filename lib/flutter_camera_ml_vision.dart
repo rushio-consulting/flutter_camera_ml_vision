@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:camera/camera.dart';
+import 'package:collection/collection.dart';
 import 'package:device_info/device_info.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
@@ -36,17 +37,17 @@ enum _CameraState {
 class CameraMlVision<T> extends StatefulWidget {
   final HandleDetection<T> detector;
   final Function(T) onResult;
-  final WidgetBuilder loadingBuilder;
-  final ErrorWidgetBuilder errorBuilder;
-  final WidgetBuilder overlayBuilder;
+  final WidgetBuilder? loadingBuilder;
+  final ErrorWidgetBuilder? errorBuilder;
+  final WidgetBuilder? overlayBuilder;
   final CameraLensDirection cameraLensDirection;
-  final ResolutionPreset resolution;
-  final Function onDispose;
+  final ResolutionPreset? resolution;
+  final Function? onDispose;
 
   CameraMlVision({
-    Key key,
-    @required this.onResult,
-    @required this.detector,
+    Key? key,
+    required this.onResult,
+    required this.detector,
     this.loadingBuilder,
     this.errorBuilder,
     this.overlayBuilder,
@@ -61,10 +62,10 @@ class CameraMlVision<T> extends StatefulWidget {
 
 class CameraMlVisionState<T> extends State<CameraMlVision<T>>
     with WidgetsBindingObserver {
-  XFile _lastImage;
+  XFile? _lastImage;
   final _visibilityKey = UniqueKey();
-  CameraController _cameraController;
-  ImageRotation _rotation;
+  CameraController? _cameraController;
+  ImageRotation? _rotation;
   _CameraState _cameraMlVisionState = _CameraState.loading;
   CameraError _cameraError = CameraError.unknown;
   bool _alreadyCheckingImage = false;
@@ -74,7 +75,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
     _initialize();
   }
 
@@ -89,11 +90,11 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // App state changed before we got the chance to initialize.
-    if (_cameraController == null || !_cameraController.value.isInitialized) {
+    if (_cameraController == null || !_cameraController!.value.isInitialized) {
       return;
     }
     if (state == AppLifecycleState.inactive) {
-      _cameraController?.dispose();
+      _stop(true).then((value) => _cameraController?.dispose());
     } else if (state == AppLifecycleState.resumed && _isStreaming) {
       _initialize();
     }
@@ -101,22 +102,24 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
 
   Future<void> stop() async {
     if (_cameraController != null) {
+      await _stop(true);
       try {
-        await _cameraController.initialize();
-        _lastImage = await _cameraController.takePicture();
+        final image = await _cameraController!.takePicture();
+        setState(() {
+          _lastImage = image;
+        });
       } on PlatformException catch (e) {
         debugPrint('$e');
       }
 
-      await _stop(false);
     }
   }
 
   Future<void> _stop(bool silently) {
     final completer = Completer();
     scheduleMicrotask(() async {
-      if (_cameraController?.value?.isStreamingImages == true && mounted) {
-        await _cameraController.stopImageStream().catchError((_) {});
+      if (_cameraController?.value.isStreamingImages == true && mounted) {
+        await _cameraController!.stopImageStream().catchError((_) {});
       }
 
       if (silently) {
@@ -138,36 +141,35 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
   }
 
   void _start() {
-    _cameraController.startImageStream(_processImage);
+    _cameraController!.startImageStream(_processImage);
     setState(() {
       _isStreaming = true;
     });
   }
 
-  CameraValue get cameraValue => _cameraController?.value;
+  CameraValue? get cameraValue => _cameraController?.value;
 
-  ImageRotation get imageRotation => _rotation;
+  ImageRotation? get imageRotation => _rotation;
 
   Future<void> Function() get prepareForVideoRecording =>
-      _cameraController.prepareForVideoRecording;
+      _cameraController!.prepareForVideoRecording;
 
   Future<void> startVideoRecording() async {
-    await _cameraController.stopImageStream();
-    return _cameraController.startVideoRecording();
+    await _cameraController!.stopImageStream();
+    return _cameraController!.startVideoRecording();
   }
 
   Future<XFile> stopVideoRecording(String path) async {
-    final file = await _cameraController.stopVideoRecording();
-    await _cameraController.startImageStream(_processImage);
+    final file = await _cameraController!.stopVideoRecording();
+    await _cameraController!.startImageStream(_processImage);
     return file;
   }
 
-  CameraController get cameraController => _cameraController;
+  CameraController? get cameraController => _cameraController;
 
   Future<XFile> takePicture(String path) async {
-    await _stop(false);
-    await _cameraController.initialize();
-    final image = await _cameraController.takePicture();
+    await _stop(true);
+    final image = await _cameraController!.takePicture();
     _start();
     return image;
   }
@@ -195,7 +197,10 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
 
       return;
     }
-    await _cameraController?.dispose();
+    if (_cameraController != null) {
+      await _stop(true);
+      await _cameraController?.dispose();
+    }
     _cameraController = CameraController(
       description,
       widget.resolution ?? ResolutionPreset.high,
@@ -206,7 +211,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
     }
 
     try {
-      await _cameraController.initialize();
+      await _cameraController!.initialize();
     } catch (ex, stack) {
       debugPrint('Can\'t initialize camera');
       debugPrint('$ex, $stack');
@@ -238,12 +243,14 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
   @override
   void dispose() {
     if (widget.onDispose != null) {
-      widget.onDispose();
+      widget.onDispose!();
     }
     if (_cameraController != null) {
-      _cameraController.dispose();
+      _stop(true).then((value) {
+        _cameraController?.dispose();
+      });
     }
-    _cameraController = null;
+
     super.dispose();
   }
 
@@ -252,20 +259,20 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
     if (_cameraMlVisionState == _CameraState.loading) {
       return widget.loadingBuilder == null
           ? Center(child: CircularProgressIndicator())
-          : widget.loadingBuilder(context);
+          : widget.loadingBuilder!(context);
     }
     if (_cameraMlVisionState == _CameraState.error) {
       return widget.errorBuilder == null
           ? Center(child: Text('$_cameraMlVisionState $_cameraError'))
-          : widget.errorBuilder(context, _cameraError);
+          : widget.errorBuilder!(context, _cameraError);
     }
 
     Widget cameraPreview = AspectRatio(
-      aspectRatio: _cameraController.value.isInitialized ? _cameraController
+      aspectRatio: _cameraController!.value.isInitialized ? _cameraController!
           .value.aspectRatio : 1,
       child: _isStreaming
           ? CameraPreview(
-        _cameraController,
+        _cameraController!,
       )
           : _getPicture(),
     );
@@ -275,7 +282,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
         fit: StackFit.passthrough,
         children: [
           cameraPreview,
-          widget.overlayBuilder(context),
+          widget.overlayBuilder!(context),
         ],
       );
     }
@@ -296,9 +303,9 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
         alignment: Alignment.center,
         fit: BoxFit.cover,
         child: SizedBox(
-          width: _cameraController.value.previewSize.height *
-              _cameraController.value.aspectRatio,
-          height: _cameraController.value.previewSize.height,
+          width: _cameraController!.value.previewSize!.height *
+              _cameraController!.value.aspectRatio,
+          height: _cameraController!.value.previewSize!.height,
           child: cameraPreview,
         ),
       ),
@@ -310,7 +317,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
       _alreadyCheckingImage = true;
       try {
         final results =
-        await _detect<T>(cameraImage, widget.detector, _rotation);
+        await _detect<T>(cameraImage, widget.detector, _rotation!);
         widget.onResult(results);
       } catch (ex, stack) {
         debugPrint('$ex, $stack');
@@ -320,7 +327,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
   }
 
   void toggle() {
-    if (_isStreaming && _cameraController.value.isStreamingImages) {
+    if (_isStreaming && _cameraController!.value.isStreamingImages) {
       stop();
     } else {
       start();
@@ -329,7 +336,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
 
   Widget _getPicture() {
     if (_lastImage != null) {
-      return Image.file(File(_lastImage.path));
+      return Image.file(File(_lastImage!.path));
     }
     return Container();
   }
