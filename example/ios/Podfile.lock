@@ -24,7 +24,7 @@ PODS:
     - GoogleUtilities/Environment (~> 7.0)
     - GoogleUtilities/Logger (~> 7.0)
     - nanopb (~> 2.30907.0)
-  - FirebaseInstallations (7.7.0):
+  - FirebaseInstallations (7.10.0):
     - FirebaseCore (~> 7.0)
     - GoogleUtilities/Environment (~> 7.0)
     - GoogleUtilities/UserDefaults (~> 7.0)
@@ -47,10 +47,12 @@ PODS:
     - "GoogleToolboxForMac/NSData+zlib (~> 2.1)"
     - GTMSessionFetcher/Core (~> 1.1)
     - Protobuf (~> 3.12)
+  - FirebaseMLVisionBarcodeModel (0.21.0):
+    - FirebaseMLVision (= 7.3.0-beta)
   - Flutter (1.0.0)
-  - GoogleAPIClientForREST/Core (1.5.1):
+  - GoogleAPIClientForREST/Core (1.5.2):
     - GTMSessionFetcher (>= 1.1.7)
-  - GoogleAPIClientForREST/Vision (1.5.1):
+  - GoogleAPIClientForREST/Vision (1.5.2):
     - GoogleAPIClientForREST/Core
     - GTMSessionFetcher (>= 1.1.7)
   - GoogleDataTransport (8.2.0):
@@ -93,10 +95,13 @@ DEPENDENCIES:
   - device_info (from `.symlinks/plugins/device_info/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_ml_vision (from `.symlinks/plugins/firebase_ml_vision/ios`)
+  - FirebaseMLVisionBarcodeModel (= 0.21)
   - Flutter (from `Flutter`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
 
 SPEC REPOS:
+  "git@github.com:rozdonmobile/CocoaPodsSpecs.git":
+    - FirebaseMLVisionBarcodeModel
   trunk:
     - Firebase
     - FirebaseCore
@@ -135,11 +140,12 @@ SPEC CHECKSUMS:
   firebase_ml_vision: f35a919d973f32a1171d5450dd4b534a299bd6b1
   FirebaseCore: 4d3c72622ce0e2106aaa07bb4b2935ba2c370972
   FirebaseCoreDiagnostics: 179bf3831213451c8addd036aca7fcf5492ec154
-  FirebaseInstallations: 42c86e7b02ff75b7f27f85833bf5dcb5f38a9774
+  FirebaseInstallations: bf2ec8dbf36ff4c91af6b9a003d15855757680c1
   FirebaseMLCommon: cbab07a0cfa19b982819fc9e030e6f3d569c23a6
   FirebaseMLVision: f6611d6c1e1895604f9033809f8e3d328ccf697a
+  FirebaseMLVisionBarcodeModel: 8b24ab39ecf6dda920f5156a53fb97025679353a
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
-  GoogleAPIClientForREST: 4bb409633efcc2e1b3f945afe7e35039b5a61db2
+  GoogleAPIClientForREST: 538a8ad0014fd88b78894e77100775a6b0a4f7ed
   GoogleDataTransport: 1024b1a4dfbd7a0e92cb20d7e0a6f1fb66b449a4
   GoogleToolboxForMac: 471e0c05d39506e50e6398f46fa9a12ae0efeff9
   GoogleUtilities: 31c5b01f978a70c6cff2afc6272b3f1921614b43
@@ -149,6 +155,6 @@ SPEC CHECKSUMS:
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
   Protobuf: 0cde852566359049847168e51bd1c690e0f70056
 
-PODFILE CHECKSUM: e5ee00144d04e7b168ba7ea28a9753540e444f3d
+PODFILE CHECKSUM: 1a13731d34096abdfa6c89540e481cbe7a631508
 
 COCOAPODS: 1.10.1

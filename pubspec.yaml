@@ -13,8 +13,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: ^1.0.3
   firebase_ml_vision: ^0.12.0
+    #git:
+    #  url: git://github.com/algirdasmac/flutterfire
+    #  path: packages/firebase_ml_vision
+  firebase_core: ^1.0.3
+  #firebase_ml_vision: ^0.12.0
   visibility_detector: ^0.2.0
   path_provider: ^2.0.1
   pedantic: ^1.11.0
