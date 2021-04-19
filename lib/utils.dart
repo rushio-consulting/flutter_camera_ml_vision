@@ -1,16 +1,13 @@
 part of 'flutter_camera_ml_vision.dart';
 
-Future<CameraDescription> _getCamera(CameraLensDirection dir) async {
-  return await availableCameras().then(
-    (cameras) => cameras.firstWhere(
-      (camera) => camera.lensDirection == dir,
-      orElse: () => cameras.isNotEmpty ? cameras.first : null,
-    ),
-  );
+Future<CameraDescription?> _getCamera(CameraLensDirection dir) async {
+  final cameras = await availableCameras();
+  final camera = cameras.firstWhereOrNull((camera) => camera.lensDirection == dir);
+  return camera ?? (cameras.isEmpty ? null : cameras.first);
 }
 
 Uint8List _concatenatePlanes(List<Plane> planes) {
-  final WriteBuffer allBytes = WriteBuffer();
+  final allBytes = WriteBuffer();
   planes.forEach((plane) => allBytes.putUint8List(plane.bytes));
   return allBytes.done().buffer.asUint8List();
 }

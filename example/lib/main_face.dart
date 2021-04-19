@@ -60,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
               return;
             }
             setState(() {
-              _faces = []..addAll(faces);
+              _faces = [...faces];
             });
           },
           onDispose: () {
@@ -81,12 +81,12 @@ class FaceDetectorPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
+    final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0
       ..color = Colors.red;
 
-    for (Face face in faces) {
+    for (final face in faces) {
       final faceRect =
           _reflectionRect(reflection, face.boundingBox, imageSize.width);
       canvas.drawRect(
