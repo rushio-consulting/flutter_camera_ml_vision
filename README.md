@@ -101,7 +101,7 @@ CameraMlVision<List<Barcode>>(
 )
 ```
 
-`CameraMlVision` is a widget that show the preview of the camera. It take a detector as parameter here we pass the `detectInImage` method of the `BarcodeDetector` object.
+`CameraMlVision` is a widget that shows the preview of the camera. It takes a detector as a parameter here we pass the `detectInImage` method of the `BarcodeDetector` object.
 The detector parameter can take all the different FirebaseVision Detector. Here is a list :
 
 ```
