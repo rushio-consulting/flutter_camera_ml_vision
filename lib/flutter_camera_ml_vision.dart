@@ -19,7 +19,8 @@ export 'package:camera/camera.dart';
 part 'utils.dart';
 
 typedef HandleDetection<T> = Future<T> Function(FirebaseVisionImage image);
-typedef ErrorWidgetBuilder = Widget Function(BuildContext context, CameraError error);
+typedef ErrorWidgetBuilder = Widget Function(
+    BuildContext context, CameraError error);
 
 enum CameraError {
   unknown,
@@ -111,7 +112,6 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
       } on PlatformException catch (e) {
         debugPrint('$e');
       }
-
     }
   }
 
@@ -172,6 +172,34 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
     final image = await _cameraController!.takePicture();
     _start();
     return image;
+  }
+
+  Future<void> flash(FlashMode mode) async {
+    await _cameraController!.setFlashMode(mode);
+  }
+
+  Future<void> focus(FocusMode mode) async {
+    await _cameraController!.setFocusMode(mode);
+  }
+
+  Future<void> focusPoint(Offset point) async {
+    await _cameraController!.setFocusPoint(point);
+  }
+
+  Future<void> zoom(double zoom) async {
+    await _cameraController!.setZoomLevel(zoom);
+  }
+
+  Future<void> exposure(ExposureMode mode) async {
+    await _cameraController!.setExposureMode(mode);
+  }
+
+  Future<void> exposureOffset(double offset) async {
+    await _cameraController!.setExposureOffset(offset);
+  }
+
+  Future<void> exposurePoint(Offset offset) async {
+    await _cameraController!.setExposurePoint(offset);
   }
 
   Future<void> _initialize() async {
@@ -267,22 +295,25 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
           : widget.errorBuilder!(context, _cameraError);
     }
 
-    Widget cameraPreview = AspectRatio(
-      aspectRatio: _cameraController!.value.isInitialized ? _cameraController!
-          .value.aspectRatio : 1,
-      child: _isStreaming
-          ? CameraPreview(
-        _cameraController!,
-      )
-          : _getPicture(),
-    );
+    var cameraPreview = _isStreaming
+        ? CameraPreview(
+            _cameraController!,
+          )
+        : _getPicture();
 
     if (widget.overlayBuilder != null) {
       cameraPreview = Stack(
         fit: StackFit.passthrough,
         children: [
           cameraPreview,
-          widget.overlayBuilder!(context),
+          (cameraController?.value.isInitialized ?? false)
+              ? AspectRatio(
+                  aspectRatio: _isLandscape()
+                      ? cameraController!.value.aspectRatio
+                      : (1 / cameraController!.value.aspectRatio),
+                  child: widget.overlayBuilder!(context),
+                )
+              : Container(),
         ],
       );
     }
@@ -299,17 +330,20 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
         }
       },
       key: _visibilityKey,
-      child: FittedBox(
-        alignment: Alignment.center,
-        fit: BoxFit.cover,
-        child: SizedBox(
-          width: _cameraController!.value.previewSize!.height *
-              _cameraController!.value.aspectRatio,
-          height: _cameraController!.value.previewSize!.height,
-          child: cameraPreview,
-        ),
-      ),
+      child: cameraPreview,
     );
+  }
+
+  DeviceOrientation? _getApplicableOrientation() {
+    return (cameraController?.value.isRecordingVideo ?? false)
+        ? cameraController?.value.recordingOrientation
+        : (cameraController?.value.lockedCaptureOrientation ??
+            cameraController?.value.deviceOrientation);
+  }
+
+  bool _isLandscape() {
+    return [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]
+        .contains(_getApplicableOrientation());
   }
 
   void _processImage(CameraImage cameraImage) async {
@@ -317,7 +351,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
       _alreadyCheckingImage = true;
       try {
         final results =
-        await _detect<T>(cameraImage, widget.detector, _rotation!);
+            await _detect<T>(cameraImage, widget.detector, _rotation!);
         widget.onResult(results);
       } catch (ex, stack) {
         debugPrint('$ex, $stack');
