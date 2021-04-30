@@ -64,19 +64,21 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: 250),
-                  child: Scrollbar(
-                    child: ListView(
-                      children: data.map((d) {
-                        return Container(
-                          color: Color(0xAAFFFFFF),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Text(d),
-                          ),
-                        );
-                      }).toList(),
+                Expanded(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: 250),
+                    child: Scrollbar(
+                      child: ListView(
+                        children: data.map((d) {
+                          return Container(
+                            color: Color(0xAAFFFFFF),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Text(d),
+                            ),
+                          );
+                        }).toList(),
+                      ),
                     ),
                   ),
                 ),
