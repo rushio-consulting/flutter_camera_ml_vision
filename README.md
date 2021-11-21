@@ -21,7 +21,7 @@ dependencies:
 ```
 
 ## Configure Firebase
-You must also configure Firebase for each platform project: Android and iOS (see the `example` folder or https://codelabs.developers.google.com/codelabs/flutter-firebase/#4 for step by step details).
+You must also configure Firebase for each platform project: Android and iOS (see the `example` folder or https://firebase.google.com/codelabs/firebase-get-to-know-flutter#3 for step by step details).
 
 
 ### iOS
