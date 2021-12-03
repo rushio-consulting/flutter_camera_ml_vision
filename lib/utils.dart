@@ -2,7 +2,8 @@ part of 'flutter_camera_ml_vision.dart';
 
 Future<CameraDescription?> _getCamera(CameraLensDirection dir) async {
   final cameras = await availableCameras();
-  final camera = cameras.firstWhereOrNull((camera) => camera.lensDirection == dir);
+  final camera =
+      cameras.firstWhereOrNull((camera) => camera.lensDirection == dir);
   return camera ?? (cameras.isEmpty ? null : cameras.first);
 }
 
@@ -12,17 +13,18 @@ Uint8List _concatenatePlanes(List<Plane> planes) {
   return allBytes.done().buffer.asUint8List();
 }
 
-FirebaseVisionImageMetadata buildMetaData(
+InputImageData buildMetaData(
   CameraImage image,
-  ImageRotation rotation,
+  InputImageRotation rotation,
 ) {
-  return FirebaseVisionImageMetadata(
-    rawFormat: image.format.raw,
+  return InputImageData(
+    inputImageFormat: InputImageFormatMethods.fromRawValue(image.format.raw) ??
+        InputImageFormat.NV21,
     size: Size(image.width.toDouble(), image.height.toDouble()),
-    rotation: rotation,
+    imageRotation: rotation,
     planeData: image.planes
         .map(
-          (plane) => FirebaseVisionImagePlaneMetadata(
+          (plane) => InputImagePlaneMetadata(
             bytesPerRow: plane.bytesPerRow,
             height: plane.height,
             width: plane.width,
@@ -35,26 +37,26 @@ FirebaseVisionImageMetadata buildMetaData(
 Future<T> _detect<T>(
   CameraImage image,
   HandleDetection<T> handleDetection,
-  ImageRotation rotation,
+  InputImageRotation rotation,
 ) async {
   return handleDetection(
-    FirebaseVisionImage.fromBytes(
-      _concatenatePlanes(image.planes),
-      buildMetaData(image, rotation),
+    InputImage.fromBytes(
+      bytes: _concatenatePlanes(image.planes),
+      inputImageData: buildMetaData(image, rotation),
     ),
   );
 }
 
-ImageRotation _rotationIntToImageRotation(int rotation) {
+InputImageRotation _rotationIntToImageRotation(int rotation) {
   switch (rotation) {
     case 0:
-      return ImageRotation.rotation0;
+      return InputImageRotation.Rotation_0deg;
     case 90:
-      return ImageRotation.rotation90;
+      return InputImageRotation.Rotation_90deg;
     case 180:
-      return ImageRotation.rotation180;
+      return InputImageRotation.Rotation_180deg;
     default:
       assert(rotation == 270);
-      return ImageRotation.rotation270;
+      return InputImageRotation.Rotation_270deg;
   }
 }

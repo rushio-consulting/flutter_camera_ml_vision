@@ -1,5 +1,5 @@
 import 'package:camera/camera.dart';
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_camera_ml_vision/flutter_camera_ml_vision.dart';
 
@@ -32,7 +32,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final _scanKey = GlobalKey<CameraMlVisionState>();
   CameraLensDirection cameraLensDirection = CameraLensDirection.front;
   FaceDetector detector =
-      FirebaseVision.instance.faceDetector(FaceDetectorOptions(
+      GoogleMlKit.vision.faceDetector(FaceDetectorOptions(
     enableTracking: true,
     mode: FaceDetectorMode.accurate,
   ));
