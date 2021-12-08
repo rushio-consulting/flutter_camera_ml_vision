@@ -16,13 +16,9 @@ First, add `flutter_camera_ml_vision` as a dependency.
 dependencies:
   flutter:
     sdk: flutter
-  flutter_camera_ml_vision: ^2.2.4
+  flutter_camera_ml_vision: ^3.0.1
 ...
 ```
-
-## Configure Firebase
-You must also configure Firebase for each platform project: Android and iOS (see the `example` folder or https://firebase.google.com/codelabs/firebase-get-to-know-flutter#3 for step by step details).
-
 
 ### iOS
 
@@ -42,10 +38,10 @@ Or in text format add the key:
 If you're using one of the on-device APIs, include the corresponding ML Kit library model in your Podfile. Then run pod update in a terminal within the same directory as your Podfile.
 
 ```
-pod 'Firebase/MLVisionBarcodeModel'
-pod 'Firebase/MLVisionFaceModel'
-pod 'Firebase/MLVisionLabelModel'
-pod 'Firebase/MLVisionTextModel'
+pod 'GoogleMLKit/BarcodeScanning' '~> 2.2.0'
+pod 'GoogleMLKit/FaceDetection' '~> 2.2.0'
+pod 'GoogleMLKit/ImageLabeling' '~> 2.2.0'
+pod 'GoogleMLKit/TextRecognition' '~> 2.2.0'
 ```
 
 ### Android
@@ -65,7 +61,7 @@ android {
     dependencies {
         // ...
 
-        api 'com.google.firebase:firebase-ml-vision-image-label-model:19.0.0'
+        api 'com.google.mlkit:image-labeling:17.0.5'
     }
 }
 ```
@@ -78,7 +74,7 @@ Optional but recommended: If you use the on-device API, configure your app to au
 <application ...>
   ...
   <meta-data
-    android:name="com.google.firebase.ml.vision.DEPENDENCIES"
+    android:name="com.google.mlkit.vision.DEPENDENCIES"
     android:value="ocr" />
   <!-- To use multiple models: android:value="ocr,label,barcode,face" -->
 </application>
@@ -90,7 +86,7 @@ Optional but recommended: If you use the on-device API, configure your app to au
 
 ```dart
 CameraMlVision<List<Barcode>>(
-  detector: FirebaseVision.instance.barcodeDetector().detectInImage,
+  detector: GoogleMlKit.vision.barcodeScanner().processImage,
   onResult: (List<Barcode> barcodes) {
     if (!mounted || resultSent) {
       return;
@@ -101,15 +97,14 @@ CameraMlVision<List<Barcode>>(
 )
 ```
 
-`CameraMlVision` is a widget that shows the preview of the camera. It takes a detector as a parameter here we pass the `detectInImage` method of the `BarcodeDetector` object.
-The detector parameter can take all the different FirebaseVision Detector. Here is a list :
+`CameraMlVision` is a widget that shows the preview of the camera. It takes a detector as a parameter; here we pass the `processImage` method of the `BarcodeScanner` object.
+The detector parameter can take all the different MLKit Vision Detectors. Here is a list :
 
 ```
-FirebaseVision.instance.barcodeDetector().detectInImage
-FirebaseVision.instance.cloudLabelDetector().detectInImage
-FirebaseVision.instance.faceDetector().processImage
-FirebaseVision.instance.labelDetector().detectInImage
-FirebaseVision.instance.textRecognizer().processImage
+GoogleMlKit.vision.barcodeScanner().processImage
+GoogleMlKit.vision.imageLabeler().processImage
+GoogleMlKit.vision.faceDetector().processImage
+GoogleMlKit.vision.textDetector().processImage
 ```
 
 Then when something is detected the onResult callback is called with the data in the parameter of the function.
