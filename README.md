@@ -38,10 +38,10 @@ Or in text format add the key:
 If you're using one of the on-device APIs, include the corresponding ML Kit library model in your Podfile. Then run pod update in a terminal within the same directory as your Podfile.
 
 ```
-pod 'GoogleMLKit/BarcodeScanning'
-pod 'GoogleMLKit/FaceDetection'
-pod 'GoogleMLKit/ImageLabeling'
-pod 'GoogleMLKit/TextRecognition'
+pod 'GoogleMLKit/BarcodeScanning' '~> 2.2.0'
+pod 'GoogleMLKit/FaceDetection' '~> 2.2.0'
+pod 'GoogleMLKit/ImageLabeling' '~> 2.2.0'
+pod 'GoogleMLKit/TextRecognition' '~> 2.2.0'
 ```
 
 ### Android
