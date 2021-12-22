@@ -9,7 +9,7 @@ environment:
   sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
-  camera: ^0.9.4+3
+  camera: ^0.9.4+5
   collection: ^1.15.0
   device_info: ^2.0.0
   firebase_core: ^1.10.5
