@@ -3,22 +3,22 @@ library flutter_camera_ml_vision;
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:camera/camera.dart';
 import 'package:collection/collection.dart';
 import 'package:device_info/device_info.dart';
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 export 'package:camera/camera.dart';
 
 part 'utils.dart';
 
-typedef HandleDetection<T> = Future<T> Function(FirebaseVisionImage image);
+typedef HandleDetection<T> = Future<T> Function(InputImage image);
 typedef ErrorWidgetBuilder = Widget Function(
     BuildContext context, CameraError error);
 
@@ -66,7 +66,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
   XFile? _lastImage;
   final _visibilityKey = UniqueKey();
   CameraController? _cameraController;
-  ImageRotation? _rotation;
+  InputImageRotation? _rotation;
   _CameraState _cameraMlVisionState = _CameraState.loading;
   CameraError _cameraError = CameraError.unknown;
   bool _alreadyCheckingImage = false;
@@ -149,7 +149,7 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>>
 
   CameraValue? get cameraValue => _cameraController?.value;
 
-  ImageRotation? get imageRotation => _rotation;
+  InputImageRotation? get imageRotation => _rotation;
 
   Future<void> Function() get prepareForVideoRecording =>
       _cameraController!.prepareForVideoRecording;
